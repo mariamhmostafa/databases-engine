@@ -10,6 +10,15 @@ public class Page implements Serializable {
     private transient int maxValInPage;
     private transient int minValInPage;
     private Vector<Tuple> tuplesInPage;
+    private String path;
+
+    public Page(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
+    }
 
     public Page (String tableName, int pageCounter){
         String fileName = tableName + pageCounter + ".bin";
