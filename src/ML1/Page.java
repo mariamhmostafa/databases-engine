@@ -5,10 +5,10 @@ import java.nio.file.Paths;
 import java.util.*;
 public class Page implements Serializable {
 
-    private int pageRows=0;
+    private int pageRows=1;
     private static int maxRows = Integer.parseInt(getVal("MaximumRowsCountinTablePage"));
-    private transient int maxValInPage;
-    private transient int minValInPage;
+    private Object maxValInPage;
+    private Object minValInPage;
     private Vector<Tuple> tuplesInPage;
     private String path;
 
@@ -20,11 +20,11 @@ public class Page implements Serializable {
         return path;
     }
 
-    public Page (String tableName, int pageCounter){
-        String fileName = tableName + pageCounter + ".bin";
+    public Page (String tableName, int pageID){
+        String fileName = tableName + pageID + ".bin";
         try {
             File myObj = new File(fileName);
-            pageCounter++;
+            pageID++;
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
             } else {
@@ -60,7 +60,29 @@ public class Page implements Serializable {
         }catch(Exception e){System.out.println(e.getMessage());}
         return keyval;
     }
+    public Object getMinValInPage() {
+        return minValInPage;
+    }
 
+    public void setMinValInPage(Object minValInPage) {
+        this.minValInPage = minValInPage;
+    }
+
+    public Vector<Tuple> getTuplesInPage() {
+        return tuplesInPage;
+    }
+
+    public void setTuplesInPage(Vector<Tuple> tuplesInPage) {
+        this.tuplesInPage = tuplesInPage;
+    }
+
+    public Object getMaxValInPage() {
+        return maxValInPage;
+    }
+
+    public void setMaxValInPage(Object maxValInPage) {
+        this.maxValInPage = maxValInPage;
+    }
     public boolean isFull(){
         return pageRows == maxRows;
         //if( DBApp.MaximumRowsCountinTablePage)
