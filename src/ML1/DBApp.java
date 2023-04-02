@@ -70,7 +70,7 @@ public class DBApp {
         String pathName = table.paths.get(pathi);
         Page page = (Page)deserializeObject(pathName);
             int i = getIndex(page.getTuplesInPage(), value);
-            page.getTuplesInPage().add(i, newtuple);
+            page.getTuplesInPage().add(i, newtuple); //inserts into first page regardless?
             while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
                 Tuple lasttuple = page.getTuplesInPage().lastElement();
                 if(pathi==table.getPageCounter()-1){
@@ -87,6 +87,7 @@ public class DBApp {
             }
         serializeObject(page, page.getPath());
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
 
     public void createPage(Table table, Tuple newtuple) throws IOException {
@@ -97,6 +98,12 @@ public class DBApp {
         page.getTuplesInPage().add(newtuple);
         serializeObject(page, page.getPath());
     }
+
+    public void deletePage(Table table, int pageID) throws IOException, ClassNotFoundException {
+        table.getPaths().remove(table.getStrTableName()+pageID+".ser");
+        table.setPageCounter(table.getPageCounter()-1);
+    }
+
     public int getIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
         int low = 0;
         int high = tuples.size()-1;
@@ -121,8 +128,18 @@ public class DBApp {
     }
 
     public void deleteFromTable(String strTableName,
-                                Hashtable<String,Object> htblColNameValue) throws DBAppException{
-
+                                Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {
+        String primaryKeyName = getPrimaryKeyName(strTableName);
+        Object primaryKey = htblColNameValue.get(primaryKeyName);
+        Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
+        int pathIndex = 0;
+        while(true){
+            String pathName = table.paths.get(pathIndex);
+            Page page = (Page)deserializeObject(pathName);
+            break;
+           // Page pageToSearchIn=deserializeObject("src/Resources/" + strTableName + i+ ".ser");
+        }
+        throw new DBAppException();
     }
 
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
@@ -197,7 +214,7 @@ public class DBApp {
         return foundTableName;
     }
 
-    public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException {
+    public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException { //returns column name
         FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row = br.readLine();
