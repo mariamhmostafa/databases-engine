@@ -99,9 +99,11 @@ public class DBApp {
         serializeObject(page, page.getPath());
     }
 
-    public void deletePage(Table table, int pageID) throws IOException, ClassNotFoundException {
-        table.getPaths().remove(table.getStrTableName()+pageID+".ser");
+    public void deletePage(Table table, String pathName) throws IOException, ClassNotFoundException {
+        table.getPaths().remove(pathName);
         table.setPageCounter(table.getPageCounter()-1);
+        //File file=new File()
+        //delete file how??? O.o hi
     }
 
     public int getIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
@@ -132,14 +134,51 @@ public class DBApp {
         String primaryKeyName = getPrimaryKeyName(strTableName);
         Object primaryKey = htblColNameValue.get(primaryKeyName);
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
-        int pathIndex = 0;
-        while(true){
-            String pathName = table.paths.get(pathIndex);
+        int indexInPage =-1;
+        for(String pathName : table.getPaths()){
             Page page = (Page)deserializeObject(pathName);
-            break;
-           // Page pageToSearchIn=deserializeObject("src/Resources/" + strTableName + i+ ".ser");
+            if(primaryKey instanceof String){
+                if(((String)page.getMaxValInPage()).compareTo((String) primaryKey)>=0 && ((String)page.getMinValInPage()).compareTo((String) primaryKey)<=0){
+                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                }
+            }else if(primaryKey instanceof Integer){
+                if(((Integer)page.getMaxValInPage()).compareTo((Integer) primaryKey)>=0 && ((Integer)page.getMinValInPage()).compareTo((Integer) primaryKey)<=0){
+                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                }
+            }else if(primaryKey instanceof Double){
+                if(((Double)page.getMaxValInPage()).compareTo((Double) primaryKey)>=0 && ((Double)page.getMinValInPage()).compareTo((Double) primaryKey)<=0){
+                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                }
+            }else{
+                if(((Date)page.getMaxValInPage()).compareTo((Date) primaryKey)>=0 && ((Date)page.getMinValInPage()).compareTo((Date) primaryKey)<=0){
+                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable)primaryKey);
+                }
+            }
+            if(indexInPage!=-1){
+                int deletePage = deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
+                if(deletePage == -1){
+                    deletePage(table, pathName);
+                }
+                return;
+            }
         }
-        throw new DBAppException();
+        throw new DBAppException(); //tuple doesn't exist or table is empty
+    }
+    public int deleteFromPage(Page page,int index,Object primaryKey,String primaryKeyName){
+        if(primaryKey.equals(page.getMaxValInPage())){
+            Tuple tuple=page.getTuplesInPage().get(index-1);
+            Object value = tuple.getPrimaryKey();
+            page.setMaxValInPage(value);
+        }else if(primaryKey.equals(page.getMinValInPage())){
+            Tuple tuple=page.getTuplesInPage().get(index-1);
+            Object value = tuple.getPrimaryKey();
+            page.setMinValInPage(value);
+        }
+        page.getTuplesInPage().remove(index);
+        if(page.getTuplesInPage().isEmpty()){
+            return -1;
+        }
+        return 0;
     }
 
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
