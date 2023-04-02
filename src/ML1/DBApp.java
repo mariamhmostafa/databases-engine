@@ -57,7 +57,7 @@ public class DBApp {
             throw new DBAppException("not valid :(");
         }
         String primaryKey = getPrimaryKeyName(strTableName);
-        Object value = htblColNameValue.get(primaryKey);
+        Comparable value = (Comparable) htblColNameValue.get(primaryKey);
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         Tuple newtuple = new Tuple(htblColNameValue, primaryKey);
         if(table.getPageCounter()==0){
@@ -66,17 +66,27 @@ public class DBApp {
             return;
         }
 
-        for(String pathName: table.paths){
-            Page page = (Page)deserializeObject(pathName);
-            if(value instanceof Integer){
-                if(((Integer)value).compareTo((Integer)page.getMinValInPage()) >= 0 && ((Integer)value).compareTo((Integer)page.getMaxValInPage()) <= 0){
-                    int i = getIndex(page.getTuplesInPage(), (Integer)value);
-                    if(!(page.getTuplesInPage().size() >Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage")))){
-                        page.getTuplesInPage().add(i, newtuple);
-                    }
+        int pathi = 0;
+        String pathName = table.paths.get(pathi);
+        Page page = (Page)deserializeObject(pathName);
+            int i = getIndex(page.getTuplesInPage(), value);
+            page.getTuplesInPage().add(i, newtuple);
+            while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
+                Tuple lasttuple = page.getTuplesInPage().lastElement();
+                if(pathi==table.getPageCounter()-1){
+                    createPage(table, lasttuple);
+                    serializeObject(table, "src/Resources/" + strTableName + ".ser");
+                    return; 
                 }
+                pathName = table.paths.get(++pathi);
+                deleteFromTable(strTableName, lasttuple.getValues());
+                serializeObject(page, page.getPath());
+                page = (Page)deserializeObject(pathName);
+                i = getIndex(page.getTuplesInPage(), value);
+                page.getTuplesInPage().add(i, newtuple);
             }
-        }
+        serializeObject(page, page.getPath());
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
 
     public void createPage(Table table, Tuple newtuple) throws IOException {

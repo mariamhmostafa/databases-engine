@@ -15,4 +15,8 @@ public class Tuple {
     public Object getPrimaryKey() {
         return primaryKey;
     }
+
+    public Hashtable<String, Object> getValues() {
+        return values;
+    }
 }
