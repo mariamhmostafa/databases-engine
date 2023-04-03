@@ -7,14 +7,32 @@ import java.util.*;
 
 public class DBApp {
 
+    // public static void main(String[] args) throws IOException, DBAppException, ClassNotFoundException, ParseException{
+    //     DBApp myDB = new DBApp();
+    //     myDB.init();
+    //     Hashtable <String, String> colType = new Hashtable<>();
+    //     colType.put("ID", "java.lang.Integer");
+    //     colType.put("name", "java.lang.String");
+    //     Hashtable <String, String> colMin = new Hashtable<>();
+    //     colMin.put("ID", "0");
+    //     colMin.put("name", "A");
+    //     Hashtable <String, String> colMax = new Hashtable<>();
+    //     colMax.put("ID", "100");
+    //     colMax.put("name", "zzzzzz");
+    //     Hashtable <String, Object> values = new Hashtable<>();
+    //     values.put("ID", 5);
+    //     values.put("Name", "Sara");
+    //     myDB.createTable("Employees", "ID", colType, colMin, colMax);
+    //     myDB.insertIntoTable("Employees", values);
+    // }
+
     Vector<String> tableNames = new Vector<>();
 
     public void init() throws IOException
-    {
-        FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
+    { 
         FileWriter writer = new  FileWriter  ( "src/Resources/metadata.csv", true );
         StringBuilder sb = new StringBuilder();
-        sb.append("Table Name, Column Name, Column Type, ClusteringKey, IndexName,IndexType, min, max");
+        sb.append("Table Name, Column Name, Column Type, ClusteringKey, IndexName,IndexType, min, max"+ "\n");
         writer.append(sb);
         writer.flush();
         writer.close();
@@ -34,14 +52,14 @@ public class DBApp {
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
             boolean clusteringKey = colName==strClusteringKeyColumn;
-            sb.append(strTableName);
-            sb.append(colName);
-            sb.append(type);
-            sb.append(clusteringKey);
-            sb.append("null");
-            sb.append("null");
-            sb.append(min);
-            sb.append(max);
+            sb.append(strTableName+", ");
+            sb.append(colName+", ");
+            sb.append(type+", ");
+            sb.append(clusteringKey+", ");
+            sb.append("null"+", ");
+            sb.append("null"+", ");
+            sb.append(min+", ");
+            sb.append(max+ "\n");
             writer.append(sb);
         }
         writer.flush();
@@ -187,14 +205,14 @@ public class DBApp {
     }
 
     public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
-        FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
+        FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row = br.readLine();
-        String[] arr = row.split(",");
+        String[] arr;
         boolean foundTableName = false;
         int countOfCols = 0;
         while(row!=null){
-            arr = row.split(",");
+            arr = row.split(", ");
             if(arr[0] == strTableName){
                 foundTableName = true;
                 countOfCols++;
