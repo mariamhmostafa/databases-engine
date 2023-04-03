@@ -173,8 +173,8 @@ public class DBApp {
                 }
             }
             if(indexInPage!=-1){
-                int deletePage = deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
-                if(deletePage == -1){
+                deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
+                if(page.getTuplesInPage().isEmpty()){
                     deletePage(table, pathName);
                 }
                 return;
@@ -182,7 +182,7 @@ public class DBApp {
         }
         throw new DBAppException(); //tuple doesn't exist or table is empty
     }
-    public int deleteFromPage(Page page,int index,Object primaryKey,String primaryKeyName){
+    public void deleteFromPage(Page page,int index,Object primaryKey,String primaryKeyName){
         if(primaryKey.equals(page.getMaxValInPage())){
             Tuple tuple=page.getTuplesInPage().get(index-1);
             Object value = tuple.getPrimaryKey();
@@ -193,10 +193,6 @@ public class DBApp {
             page.setMinValInPage(value);
         }
         page.getTuplesInPage().remove(index);
-        if(page.getTuplesInPage().isEmpty()){
-            return -1;
-        }
-        return 0;
     }
 
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
