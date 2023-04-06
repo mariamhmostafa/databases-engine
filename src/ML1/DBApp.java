@@ -7,24 +7,24 @@ import java.util.*;
 
 public class DBApp {
 
-    // public static void main(String[] args) throws IOException, DBAppException, ClassNotFoundException, ParseException{
-    //     DBApp myDB = new DBApp();
-    //     myDB.init();
-    //     Hashtable <String, String> colType = new Hashtable<>();
-    //     colType.put("ID", "java.lang.Integer");
-    //     colType.put("name", "java.lang.String");
-    //     Hashtable <String, String> colMin = new Hashtable<>();
-    //     colMin.put("ID", "0");
-    //     colMin.put("name", "A");
-    //     Hashtable <String, String> colMax = new Hashtable<>();
-    //     colMax.put("ID", "100");
-    //     colMax.put("name", "zzzzzz");
-    //     Hashtable <String, Object> values = new Hashtable<>();
-    //     values.put("ID", 5);
-    //     values.put("Name", "Sara");
-    //     myDB.createTable("Employees", "ID", colType, colMin, colMax);
-    //     myDB.insertIntoTable("Employees", values);
-    // }
+     public static void main(String[] args) throws IOException, DBAppException, ClassNotFoundException, ParseException{
+         DBApp myDB = new DBApp();
+         myDB.init();
+         Hashtable <String, String> colType = new Hashtable<>();
+         colType.put("ID", "java.lang.Integer");
+         colType.put("name", "java.lang.String");
+         Hashtable <String, String> colMin = new Hashtable<>();
+         colMin.put("ID", "0");
+         colMin.put("name", "A");
+         Hashtable <String, String> colMax = new Hashtable<>();
+         colMax.put("ID", "100");
+         colMax.put("name", "zzzzzz");
+         Hashtable <String, Object> values = new Hashtable<>();
+         values.put("ID", 5);
+         values.put("Name", "Sara");
+         myDB.createTable("Employees", "ID", colType, colMin, colMax);
+         myDB.insertIntoTable("Employees", values);
+     }
 
     Vector<String> tableNames = new Vector<>();
 
@@ -83,26 +83,25 @@ public class DBApp {
             serializeObject(table, "src/Resources/" + strTableName + ".ser");
             return;
         }
-
         int pathi = 0;
         String pathName = table.paths.get(pathi);
         Page page = (Page)deserializeObject(pathName);
-            int i = getIndex(page.getTuplesInPage(), value);
-            page.getTuplesInPage().add(i, newtuple); //inserts into first page regardless?
-            while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
-                Tuple lasttuple = page.getTuplesInPage().lastElement();
-                if(pathi==table.getPageCounter()-1){
-                    createPage(table, lasttuple);
-                    serializeObject(table, "src/Resources/" + strTableName + ".ser");
-                    return; 
-                }
-                pathName = table.paths.get(++pathi);
-                deleteFromTable(strTableName, lasttuple.getValues());
-                serializeObject(page, page.getPath());
-                page = (Page)deserializeObject(pathName);
-                i = getIndex(page.getTuplesInPage(), value);
-                page.getTuplesInPage().add(i, newtuple);
+        int i = getIndex(page.getTuplesInPage(), value);
+        page.getTuplesInPage().add(i, newtuple); //inserts into first page regardless?
+        while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
+            Tuple lasttuple = page.getTuplesInPage().lastElement();
+            if(pathi==table.getPageCounter()-1){
+                createPage(table, lasttuple);
+                serializeObject(table, "src/Resources/" + strTableName + ".ser");
+                return;
             }
+            pathName = table.paths.get(++pathi);
+            deleteFromTable(strTableName, lasttuple.getValues());
+            serializeObject(page, page.getPath());
+            page = (Page)deserializeObject(pathName);
+            i = getIndex(page.getTuplesInPage(), value);
+            page.getTuplesInPage().add(i, newtuple);
+        }
         serializeObject(page, page.getPath());
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
@@ -114,6 +113,7 @@ public class DBApp {
         page.setMinValInPage(newtuple.getPrimaryKey());
         page.setMaxValInPage(newtuple.getPrimaryKey());
         page.getTuplesInPage().add(newtuple);
+        table.getPaths().add(page.getPath());
         serializeObject(page, page.getPath());
     }
 

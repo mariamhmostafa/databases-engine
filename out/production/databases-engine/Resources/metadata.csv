@@ -1,0 +1,4 @@
+Table Name, Column Name, Column Type, ClusteringKey, IndexName,IndexType, min, max
+Employees, ID, java.lang.Integer, true, null, null, 0, 100
+Employees, ID, java.lang.Integer, true, null, null, 0, 100
+Employees, name, java.lang.String, false, null, null, A, zzzzzz
