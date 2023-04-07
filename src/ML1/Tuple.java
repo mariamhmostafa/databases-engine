@@ -1,9 +1,10 @@
 package ML1;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
 
-public class Tuple {
+public class Tuple implements Serializable{
     private Hashtable<String, Object> values;
     private Object primaryKey;
 

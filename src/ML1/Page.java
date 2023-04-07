@@ -9,7 +9,7 @@ public class Page implements Serializable {
     private static int maxRows = Integer.parseInt(getVal("MaximumRowsCountinTablePage"));
     private Object maxValInPage;
     private Object minValInPage;
-    private Vector<Tuple> tuplesInPage;
+    private Vector<Tuple> tuplesInPage = new Vector<>();
     private String path;
 
     public Page(String path) {

@@ -8,25 +8,46 @@ import java.util.*;
 public class DBApp {
 
      public static void main(String[] args) throws IOException, DBAppException, ClassNotFoundException, ParseException{
-         DBApp myDB = new DBApp();
-         myDB.init();
-         Hashtable <String, String> colType = new Hashtable<>();
-         colType.put("ID", "java.lang.Integer");
-         colType.put("name", "java.lang.String");
-         Hashtable <String, String> colMin = new Hashtable<>();
-         colMin.put("ID", "0");
-         colMin.put("name", "A");
-         Hashtable <String, String> colMax = new Hashtable<>();
-         colMax.put("ID", "100");
-         colMax.put("name", "zzzzzz");
-         Hashtable <String, Object> values = new Hashtable<>();
-         values.put("ID", 5);
-         values.put("Name", "Sara");
-         myDB.createTable("Employees", "ID", colType, colMin, colMax);
-         myDB.insertIntoTable("Employees", values);
-     }
+        String strTableName = "Student"; 
+        DBApp dbApp = new DBApp( );
+        //dbApp.init();
+        // Hashtable htblColNameType = new Hashtable( );
+        // htblColNameType.put("id", "java.lang.Integer");
+        // htblColNameType.put("name", "java.lang.String");
+        // htblColNameType.put("gpa", "java.lang.double");
+        // Hashtable <String, String> colMin = new Hashtable<>();
+        // colMin.put("id", "0");
+        // colMin.put("name", "A");
+        // colMin.put("gpa", "0");
+        // Hashtable <String, String> colMax = new Hashtable<>();
+        // colMax.put("id", "100");
+        // colMax.put("name", "zzzzzz");
+        // colMax.put("gpa","4");
+        // dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
+    
+        // Hashtable toDelete = new Hashtable( ); 
+        // toDelete.put("id", new Integer( 12 )); 
+        // toDelete.put("name", new String("Ahmed Noor" ) ); 
+        // toDelete.put("gpa", new Double( 0.95 ) ); 
+        
+        // Hashtable htblColNameValue = new Hashtable( ); 
+        // htblColNameValue.put("id", new Integer( 19 )); 
+        // htblColNameValue.put("name", new String("Mariam Maarek" ) ); 
+        // htblColNameValue.put("gpa", new Double( 0.87) ); 
+        // dbApp.insertIntoTable( strTableName , htblColNameValue );
+        // Table table= (Table)dbApp.deserializeObject("src/Resources/Student.ser");
+        // System.out.println(table.getPaths().get(0));
+        
 
-    Vector<String> tableNames = new Vector<>();
+        dbApp.deleteFromTable(strTableName, toDelete);
+
+        Page page = (Page)dbApp.deserializeObject("src/Resources/Student0.ser");
+        for(Tuple t: page.getTuplesInPage()){
+            for(String key: t.getValues().keySet()){
+                System.out.println(key + "value:" + t.getValues().get(key).toString());
+            }
+        }
+     }
 
     public void init() throws IOException
     { 
@@ -42,12 +63,11 @@ public class DBApp {
     public void createTable(String strTableName, String strClusteringKeyColumn, Hashtable<String,String> htblColNameType,
                             Hashtable<String,String> htblColNameMin, Hashtable<String,String> htblColNameMax ) throws DBAppException, IOException {
         Table newTable = new Table(strTableName, strClusteringKeyColumn,htblColNameType,htblColNameMin,htblColNameMax);
-        tableNames.add(strTableName);
         serializeObject(newTable, "src/Resources/" + strTableName + ".ser");
         //write to csv
         FileWriter writer = new  FileWriter  ( "src/Resources/metadata.csv", true );
-        StringBuilder sb = new StringBuilder();
         for(String colName : htblColNameType.keySet()){
+            StringBuilder sb = new StringBuilder();
             String type = htblColNameType.get(colName);
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
@@ -62,6 +82,7 @@ public class DBApp {
             sb.append(max+ "\n");
             writer.append(sb);
         }
+    
         writer.flush();
         writer.close();
     }
@@ -73,10 +94,10 @@ public class DBApp {
     public void insertIntoTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ParseException, ClassNotFoundException {
         if(!isValid(strTableName, htblColNameValue)){
             throw new DBAppException("not valid :(");
-        }
-        String primaryKey = getPrimaryKeyName(strTableName);
-        Comparable value = (Comparable) htblColNameValue.get(primaryKey);
+        }     
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
+        String primaryKey = table.getStrClusteringKeyColumn();
+        Comparable value = (Comparable) htblColNameValue.get(primaryKey);
         Tuple newtuple = new Tuple(htblColNameValue, primaryKey);
         if(table.getPageCounter()==0){
             createPage(table, newtuple);
@@ -108,7 +129,7 @@ public class DBApp {
     }
 
     public void createPage(Table table, Tuple newtuple) throws IOException {
-        Page page = new Page(table.getStrTableName()+table.getPageCounter()+".ser");
+        Page page = new Page("src/Resources/"+table.getStrTableName()+table.getPageCounter()+".ser");
         table.setPageCounter(table.getPageCounter()+1);
         page.setMinValInPage(newtuple.getPrimaryKey());
         page.setMaxValInPage(newtuple.getPrimaryKey());
@@ -148,27 +169,29 @@ public class DBApp {
     }
 
     public void deleteFromTable(String strTableName,
-                                Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {
-        String primaryKeyName = getPrimaryKeyName(strTableName);
-        Object primaryKey = htblColNameValue.get(primaryKeyName);
+                                Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {   
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
+        String primaryKeyName = table.getStrClusteringKeyColumn();
+        Object primaryKey = htblColNameValue.get(primaryKeyName);
         int indexInPage =-1;
         for(String pathName : table.getPaths()){
             Page page = (Page)deserializeObject(pathName);
+            Object max= page.getTuplesInPage().get(page.getTuplesInPage().size()-1).getPrimaryKey();
+            Object min= page.getTuplesInPage().get(0).getPrimaryKey();
             if(primaryKey instanceof String){
-                if(((String)page.getMaxValInPage()).compareTo((String) primaryKey)>=0 && ((String)page.getMinValInPage()).compareTo((String) primaryKey)<=0){
+                if(((String)max).compareTo((String) primaryKey)>=0 && ((String)min).compareTo((String) primaryKey)<=0){
                     indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else if(primaryKey instanceof Integer){
-                if(((Integer)page.getMaxValInPage()).compareTo((Integer) primaryKey)>=0 && ((Integer)page.getMinValInPage()).compareTo((Integer) primaryKey)<=0){
+                if(((Integer)max).compareTo((Integer) primaryKey)>=0 && ((Integer)min).compareTo((Integer) primaryKey)<=0){
                     indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else if(primaryKey instanceof Double){
-                if(((Double)page.getMaxValInPage()).compareTo((Double) primaryKey)>=0 && ((Double)page.getMinValInPage()).compareTo((Double) primaryKey)<=0){
+                if(((Double)max).compareTo((Double) primaryKey)>=0 && ((Double)min).compareTo((Double) primaryKey)<=0){
                     indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else{
-                if(((Date)page.getMaxValInPage()).compareTo((Date) primaryKey)>=0 && ((Date)page.getMinValInPage()).compareTo((Date) primaryKey)<=0){
+                if(((Date)max).compareTo((Date) primaryKey)>=0 && ((Date)min).compareTo((Date) primaryKey)<=0){
                     indexInPage = getIndex(page.getTuplesInPage(), (Comparable)primaryKey);
                 }
             }
@@ -183,15 +206,15 @@ public class DBApp {
         throw new DBAppException(); //tuple doesn't exist or table is empty
     }
     public void deleteFromPage(Page page,int index,Object primaryKey,String primaryKeyName){
-        if(primaryKey.equals(page.getMaxValInPage())){
-            Tuple tuple=page.getTuplesInPage().get(index-1);
-            Object value = tuple.getPrimaryKey();
-            page.setMaxValInPage(value);
-        }else if(primaryKey.equals(page.getMinValInPage())){
-            Tuple tuple=page.getTuplesInPage().get(index-1);
-            Object value = tuple.getPrimaryKey();
-            page.setMinValInPage(value);
-        }
+        // if(primaryKey.equals(page.getMaxValInPage())){
+        //     Tuple tuple=page.getTuplesInPage().get(index-1);
+        //     Object value = tuple.getPrimaryKey();
+        //     page.setMaxValInPage(value);
+        // }else if(primaryKey.equals(page.getMinValInPage())){
+        //     Tuple tuple=page.getTuplesInPage().get(index-1);
+        //     Object value = tuple.getPrimaryKey();
+        //     page.setMinValInPage(value);
+        // // }
         page.getTuplesInPage().remove(index);
     }
 
@@ -209,7 +232,7 @@ public class DBApp {
         int countOfCols = 0;
         while(row!=null){
             arr = row.split(", ");
-            if(arr[0] == strTableName){
+            if(arr[0].equals(strTableName)){
                 foundTableName = true;
                 countOfCols++;
                 String colName = arr[1];
@@ -217,47 +240,44 @@ public class DBApp {
                 String min = arr[6];
                 String max = arr[7];
                 Object object = htblColNameValue.get(colName);
-                switch(colType){
-                    case "java.lang.integer":
-                        if(!(object instanceof Integer)){
-                            return false;
-                        }
-                        int minI = Integer.parseInt(min);
-                        int maxI = Integer.parseInt(max);
-                        if(((Integer)object)<minI || ((Integer)object)>maxI){
-                            return false;
-                        }
-                        break;
-                    case "java.lang.string":
-                        if(!(object instanceof String)){
-                            return false;
-                        }
-                        if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
-                            return false;
-                        }
-                        break;
-                    case "java.util.date":
-                        if(!(object instanceof Date)){
-                            return false;
-                        }
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                        Date minDate = formatter.parse(min);
-                        Date maxDate = formatter.parse(max);
-                        if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
-                            return false;
-                        }
-                        break;
-                    default:
-                        if(!(object instanceof Double)){
-                            return false;
-                        }
-                        double minD = Double.parseDouble(min);
-                        double maxD = Double.parseDouble(max);
-                        if(((Double)object)<minD || ((Double)object)>maxD){
-                            return false;
-                        }
-                        break;
+                
+                if(colType.equals("java.lang.integer")){
+                    if(!(object instanceof java.lang.Integer)){
+                        return false;
+                    }
+                    int minI = Integer.parseInt(min);
+                    int maxI = Integer.parseInt(max);
+                    if(((Integer)object)<minI || ((Integer)object)>maxI){
+                        return false;
+                    }
+                }else if(colType.equals("java.lang.string")){
+                    if(!(object instanceof java.lang.String)){
+                        return false;
+                    }
+                    if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
+                        return false;
+                    }
+                }else if(colType.equals("java.util.date")){
+                    if(!(object instanceof java.util.Date)){
+                        return false;
+                    }
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    Date minDate = formatter.parse(min);
+                    Date maxDate = formatter.parse(max);
+                    if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
+                        return false;
+                    }
+                }else{
+                    if(!(object instanceof java.lang.Double)){
+                        return false;
+                    }
+                    double minD = Double.parseDouble(min);
+                    double maxD = Double.parseDouble(max);
+                    if(((Double)object)<minD || ((Double)object)>maxD){
+                        return false;
+                    }
                 }
+
             }
             row = br.readLine();
         }
@@ -267,22 +287,22 @@ public class DBApp {
         return foundTableName;
     }
 
-    public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException { //returns column name
-        FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
-        BufferedReader br = new BufferedReader(oldMetaDataFile);
-        String row = br.readLine();
-        String[] arr = row.split(",");
-        while(row!=null){
-            arr = row.split(",");
-            if(arr[0] == strTableName) {
-                if(Boolean.parseBoolean(arr[3])){
-                    return arr[1];
-                }
-            }
-            row = br.readLine();
-        }
-        throw new DBAppException("No primary key found");
-    }
+    // public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException { //returns column name
+    //     FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
+    //     BufferedReader br = new BufferedReader(oldMetaDataFile);
+    //     String row = br.readLine();
+    //     String[] arr = row.split(",");
+    //     while(row!=null){
+    //         arr = row.split(",");
+    //         if(arr[0] == strTableName) {
+    //             if(Boolean.parseBoolean(arr[3])){
+    //                 return arr[1];
+    //             }
+    //         }
+    //         row = br.readLine();
+    //     }
+    //     throw new DBAppException("No primary key found");
+    // }
 
 
 
