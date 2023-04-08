@@ -13,6 +13,10 @@ public class Tuple implements Serializable{
         this.primaryKey = primaryKey;
     }
 
+    public void setValues(Hashtable<String, Object> values) {
+        this.values = values;
+    }
+
     public Object getPrimaryKey() {
         return primaryKey;
     }

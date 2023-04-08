@@ -171,8 +171,10 @@ public class DBApp {
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row = br.readLine();
         String[] arr;
+        Object clusteringKeyValue = null;
         boolean foundTableName = false;
         int countOfCols = 0;
+        Boolean updated=false;
         while(row!=null){
             arr = row.split(", ");
             if(arr[0].equals(strTableName)) {
@@ -183,20 +185,62 @@ public class DBApp {
                 if (colName.equalsIgnoreCase(primaryKeyName)) {
 
                     if(colType.equals("java.lang.integer")){
-                      int clusteringKeyValue= Integer.parseInt(strClusteringKeyValue);
+                       clusteringKeyValue= Integer.parseInt(strClusteringKeyValue);
 
                     }else if(colType.equals("java.lang.string")){
-                        String clusteringKeyValue= strClusteringKeyValue;
+                         clusteringKeyValue= strClusteringKeyValue;
 
                     }else if(colType.equals("java.util.date")){
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                        Date clusteringKeyValue= formatter.parse(strClusteringKeyValue);
-                }
+                        clusteringKeyValue= formatter.parse(strClusteringKeyValue);
+                    }else if(colType.equals("java.lang.double")){
+                        clusteringKeyValue= Double.parseDouble(strClusteringKeyValue);
+
+                    }
+                    int indexInPage =-1;
+                    for(String pathName : table.getPaths()){
+                        Page page = (Page)deserializeObject(pathName);
+                        Object max= page.getTuplesInPage().get(page.getTuplesInPage().size()-1).getPrimaryKey();
+                        Object min= page.getTuplesInPage().get(0).getPrimaryKey();
+                        if(clusteringKeyValue instanceof String){
+                            if(((String)max).compareTo((String) clusteringKeyValue)>=0 && ((String)min).compareTo((String) clusteringKeyValue)<=0){
+                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                            }
+                        }else if(clusteringKeyValue instanceof Integer){
+                            if(((Integer)max).compareTo((Integer) clusteringKeyValue)>=0 && ((Integer)min).compareTo((Integer) clusteringKeyValue)<=0){
+                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                            }
+                        }else if(clusteringKeyValue instanceof Double){
+                            if(((Double)max).compareTo((Double) clusteringKeyValue)>=0 && ((Double)min).compareTo((Double) clusteringKeyValue)<=0){
+                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                            }
+                        }else{
+                            if(((Date)max).compareTo((Date) clusteringKeyValue)>=0 && ((Date)min).compareTo((Date) clusteringKeyValue)<=0){
+                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable)clusteringKeyValue);
+                            }
+                        }
+                        if(indexInPage!=-1){
+                            updateInPage(page,indexInPage,htblColNameValue);
+                            updated=true;
+                        }
+
+                    serializeObject(page, page.getPath());
+
+                    }
 
 
             }
 
-            }}}
+            }
+        }
+        if(!updated){
+            throw new DBAppException("Cannot update");
+        }
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        ///check validity of update values.
+
+
+     }
 
     public void deleteFromTable(String strTableName,
                                 Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {
@@ -315,6 +359,15 @@ public class DBApp {
             return false;
         }
         return foundTableName;
+    }
+
+    public void updateInPage(Page page,int index,Hashtable<String,Object> htblColNameValue){
+         Hashtable <String,Object> toUpdate=page.getTuplesInPage().get(index).getValues();
+        for(String key: htblColNameValue.keySet()){
+            Object valu=htblColNameValue.get(key);
+            toUpdate.put(key,valu);
+        }
+        page.getTuplesInPage().get(index).setValues(toUpdate);
     }
 
     // public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException { //returns column name
