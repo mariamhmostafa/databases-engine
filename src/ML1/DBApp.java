@@ -39,7 +39,7 @@ public class DBApp {
         // System.out.println(table.getPaths().get(0));
         
 
-        dbApp.deleteFromTable(strTableName, toDelete);
+       // dbApp.deleteFromTable(strTableName, toDelete);
 
         Page page = (Page)dbApp.deserializeObject("src/Resources/Student0.ser");
         for(Tuple t: page.getTuplesInPage()){
@@ -125,7 +125,7 @@ public class DBApp {
         }
         serializeObject(page, page.getPath());
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
-        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+     //why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
 
     public void createPage(Table table, Tuple newtuple) throws IOException {
@@ -164,12 +164,42 @@ public class DBApp {
     }
 
     public void updateTable(String strTableName,String strClusteringKeyValue,
-                            Hashtable<String,Object> htblColNameValue ) throws DBAppException{
+                            Hashtable<String,Object> htblColNameValue ) throws DBAppException, IOException, ClassNotFoundException, ParseException {
+        Table table=(Table)deserializeObject("src/Resources/" + strTableName + ".ser");
+        String primaryKeyName = table.getStrClusteringKeyColumn();
+        FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
+        BufferedReader br = new BufferedReader(oldMetaDataFile);
+        String row = br.readLine();
+        String[] arr;
+        boolean foundTableName = false;
+        int countOfCols = 0;
+        while(row!=null){
+            arr = row.split(", ");
+            if(arr[0].equals(strTableName)) {
+                foundTableName = true;
+                countOfCols++;
+                String colName = arr[1];
+                String colType = arr[2].toLowerCase();
+                if (colName.equalsIgnoreCase(primaryKeyName)) {
 
-    }
+                    if(colType.equals("java.lang.integer")){
+                      int clusteringKeyValue= Integer.parseInt(strClusteringKeyValue);
+
+                    }else if(colType.equals("java.lang.string")){
+                        String clusteringKeyValue= strClusteringKeyValue;
+
+                    }else if(colType.equals("java.util.date")){
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                        Date clusteringKeyValue= formatter.parse(strClusteringKeyValue);
+                }
+
+
+            }
+
+            }}}
 
     public void deleteFromTable(String strTableName,
-                                Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {   
+                                Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
         Object primaryKey = htblColNameValue.get(primaryKeyName);
@@ -240,7 +270,7 @@ public class DBApp {
                 String min = arr[6];
                 String max = arr[7];
                 Object object = htblColNameValue.get(colName);
-                
+
                 if(colType.equals("java.lang.integer")){
                     if(!(object instanceof java.lang.Integer)){
                         return false;
