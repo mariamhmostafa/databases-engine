@@ -130,7 +130,7 @@ public class DBApp {
         int pathi = 0;
         String pathName = table.paths.get(pathi);
         Page page = (Page)deserializeObject(pathName);
-        int i = getIndex(page.getTuplesInPage(), value);
+        int i = getNewIndex(page.getTuplesInPage(), value);
         System.out.println(i);
         page.getTuplesInPage().add(i, newtuple);
         while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
@@ -144,7 +144,7 @@ public class DBApp {
             deleteFromTable(strTableName, lasttuple.getValues());
             serializeObject(page, page.getPath());
             page = (Page)deserializeObject(pathName);
-            i = getIndex(page.getTuplesInPage(), value);
+            i = getNewIndex(page.getTuplesInPage(), value);
             page.getTuplesInPage().add(i, newtuple);
         }
         serializeObject(page, page.getPath());
@@ -169,12 +169,30 @@ public class DBApp {
         //delete file how??? O.o hi
     }
 
-    public int getIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
+    public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
         int low = 0;
         int high = tuples.size()-1;
         int mid=0;
         while(low<=high){
             mid = ((high-low)/2) + low;
+            Comparable tupleVal = (Comparable)tuples.get(mid).getPrimaryKey();
+            if(tupleVal.equals(value)){
+                return mid;
+            }else if(tupleVal.compareTo(value)<0){
+                low = mid+1;
+            }else{
+                high = mid-1;
+            }
+        }
+        return mid;
+    }
+
+    public int getNewIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
+        int low = 0;
+        int high = tuples.size()-1;
+        int mid=0;
+        while(low<=high){
+            mid = ((high-low)/2) + low; // 1 0 0
             Comparable tupleVal = (Comparable)tuples.get(mid).getPrimaryKey();
             if(tupleVal.equals(value)){
                 throw new DBAppException("duplicate primary key");
@@ -184,7 +202,7 @@ public class DBApp {
                 high = mid-1;
             }
         }
-        return mid;
+        return low;
     }
 
     public void updateTable(String strTableName,String strClusteringKeyValue,
@@ -196,14 +214,10 @@ public class DBApp {
         String row;
         String[] arr;
         Object clusteringKeyValue = null;
-        boolean foundTableName = false;
-        int countOfCols = 0;
         boolean updated=false;
         while((row = br.readLine()) != null){
             arr = row.split(", ");
             if(arr[0].equals(strTableName)) {
-                foundTableName = true;
-                countOfCols++;
                 String colName = arr[1];
                 String colType = arr[2].toLowerCase();
                 if (colName.equalsIgnoreCase(primaryKeyName)) {
@@ -227,22 +241,22 @@ public class DBApp {
                         System.out.println("min"+min.toString());
                         if(clusteringKeyValue instanceof String){
                             if(((String)max).compareTo((String) clusteringKeyValue)>=0 && ((String)min).compareTo((String) clusteringKeyValue)<=0){
-                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                                indexInPage = findIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
                             }
                         }else if(clusteringKeyValue instanceof Integer){
                             System.out.println("clstr"+(Integer)clusteringKeyValue);
                             System.out.println("entered first");
                             if(((Integer)max).compareTo((Integer) clusteringKeyValue)>=0 && ((Integer)min).compareTo((Integer) clusteringKeyValue)<=0){
-                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                                indexInPage = findIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
                                 System.out.println("entered second");
                             }
                         }else if(clusteringKeyValue instanceof Double){
                             if(((Double)max).compareTo((Double) clusteringKeyValue)>=0 && ((Double)min).compareTo((Double) clusteringKeyValue)<=0){
-                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
+                                indexInPage = findIndex(page.getTuplesInPage(), (Comparable) clusteringKeyValue);
                             }
                         }else{
                             if(((Date)max).compareTo((Date) clusteringKeyValue)>=0 && ((Date)min).compareTo((Date) clusteringKeyValue)<=0){
-                                indexInPage = getIndex(page.getTuplesInPage(), (Comparable)clusteringKeyValue);
+                                indexInPage = findIndex(page.getTuplesInPage(), (Comparable)clusteringKeyValue);
                             }
                         }
                         if(indexInPage!=-1){ //may update a different tuple if clustering key not found
@@ -277,19 +291,19 @@ public class DBApp {
             Object min= page.getTuplesInPage().get(0).getPrimaryKey();
             if(primaryKey instanceof String){
                 if(((String)max).compareTo((String) primaryKey)>=0 && ((String)min).compareTo((String) primaryKey)<=0){
-                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                    indexInPage = findIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else if(primaryKey instanceof Integer){
                 if(((Integer)max).compareTo((Integer) primaryKey)>=0 && ((Integer)min).compareTo((Integer) primaryKey)<=0){
-                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                    indexInPage = findIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else if(primaryKey instanceof Double){
                 if(((Double)max).compareTo((Double) primaryKey)>=0 && ((Double)min).compareTo((Double) primaryKey)<=0){
-                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable) primaryKey);
+                    indexInPage = findIndex(page.getTuplesInPage(), (Comparable) primaryKey);
                 }
             }else{
                 if(((Date)max).compareTo((Date) primaryKey)>=0 && ((Date)min).compareTo((Date) primaryKey)<=0){
-                    indexInPage = getIndex(page.getTuplesInPage(), (Comparable)primaryKey);
+                    indexInPage = findIndex(page.getTuplesInPage(), (Comparable)primaryKey);
                 }
             }
             if(indexInPage!=-1){
