@@ -11,6 +11,7 @@ public class DBApp {
          String strTableName = "Student";
          DBApp dbApp = new DBApp( );
          dbApp.init();
+         //////creating table:
          Hashtable htblColNameType = new Hashtable();
          htblColNameType.put("id", "java.lang.Integer");
          htblColNameType.put("name", "java.lang.String");
@@ -24,12 +25,8 @@ public class DBApp {
          colMax.put("name", "zzzzzz");
          colMax.put("gpa","4");
          dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
-    
-        // Hashtable toDelete = new Hashtable( ); 
-        // toDelete.put("id", new Integer( 12 )); 
-        // toDelete.put("name", new String("Ahmed Noor" ) ); 
-        // toDelete.put("gpa", new Double( 0.95 ) ); 
         
+         //////inserting into table:
          Hashtable htblColNameValue = new Hashtable( );
          htblColNameValue.put("id", new Integer( 19 ));
          htblColNameValue.put("name", new String("Mariam Maarek" ) );
@@ -40,33 +37,41 @@ public class DBApp {
          htblColNameValue2.put("name", new String("Nairuzy" ) );
          htblColNameValue2.put("gpa", new Double( 4.0) );
          dbApp.insertIntoTable( strTableName , htblColNameValue2 );
-         Table table= (Table)dbApp.deserializeObject("src/Resources/Student.ser");
 
-         // System.out.println(table.getPaths().get(0));
-       // dbApp.deleteFromTable(strTableName, toDelete);
-
-         System.out.println("before:");
+//          System.out.println(table.getPaths().get(0));
+//          dbApp.deleteFromTable(strTableName, toDelete);
+         
+         //////deleting from table:
+         
+//         Hashtable toDelete = new Hashtable( );
+//         toDelete.put("id", new Integer( 12 ));
+//         toDelete.put("name", new String("Ahmed Noor" ) );
+//         toDelete.put("gpa", new Double( 0.95 ) );
+         dbApp.deleteFromTable(strTableName, htblColNameValue);
+         
+//         System.out.println("before:");
          Page page = (Page)dbApp.deserializeObject("src/Resources/Student0.ser");
          for(Tuple t: page.getTuplesInPage()){
              for(String key: t.getValues().keySet()){
                  System.out.println(key + " value: " + t.getValues().get(key).toString());
              }
          }
-         dbApp.serializeObject(table, "src/Resources/Student.ser");
-         dbApp.serializeObject(page, "src/Resources/Student0.ser");
-    
-         Hashtable htblColNameValue3 = new Hashtable( );
-         htblColNameValue3.put("gpa", new Double( 0.7) );
-         dbApp.updateTable(strTableName, "20", htblColNameValue3);
-    
-         System.out.println();
-         System.out.println("after:");
-         Page page1 = (Page) dbApp.deserializeObject("src/Resources/Student0.ser");
-         for(Tuple t: page1.getTuplesInPage()){
-             for(String key: t.getValues().keySet()){
-                 System.out.println(key + " value: " + t.getValues().get(key).toString());
-             }
-         }
+         
+//         dbApp.serializeObject(table, "src/Resources/Student.ser");
+//         dbApp.serializeObject(page, "src/Resources/Student0.ser");
+         ////////updating table:
+//         Hashtable htblColNameValue3 = new Hashtable( );
+//         htblColNameValue3.put("gpa", new Double( 0.7) );
+//         dbApp.updateTable(strTableName, "20", htblColNameValue3);
+//
+//         System.out.println();
+//         System.out.println("after:");
+//         Page page1 = (Page) dbApp.deserializeObject("src/Resources/Student0.ser");
+//         for(Tuple t: page1.getTuplesInPage()){
+//             for(String key: t.getValues().keySet()){
+//                 System.out.println(key + " value: " + t.getValues().get(key).toString());
+//             }
+//         }
 
      }
 
@@ -84,7 +89,6 @@ public class DBApp {
                             Hashtable<String,String> htblColNameMin, Hashtable<String,String> htblColNameMax ) throws DBAppException, IOException {
         Table newTable = new Table(strTableName, strClusteringKeyColumn,htblColNameType,htblColNameMin,htblColNameMax);
         serializeObject(newTable, "src/Resources/" + strTableName + ".ser");
-        //write to csv
         FileWriter writer = new  FileWriter  ( "src/Resources/metadata.csv", true );
         for(String colName : htblColNameType.keySet()){
             StringBuilder sb = new StringBuilder();
@@ -105,10 +109,6 @@ public class DBApp {
         writer.flush();
         writer.close();
     }
-
-    //CSVWriter writer = new CSVWriter(new FileWriter("new.csv"));
-    //writer.writeNext(lineAsList.toArray());
-
 
     public void insertIntoTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ParseException, ClassNotFoundException {
         if(!isValid(strTableName, htblColNameValue)){
@@ -144,7 +144,7 @@ public class DBApp {
         }
         serializeObject(page, page.getPath());
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
-     //why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
+//     why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
 
     public void createPage(Table table, Tuple newtuple) throws IOException {
@@ -156,14 +156,7 @@ public class DBApp {
         table.getPaths().add(page.getPath());
         serializeObject(page, page.getPath());
     }
-
-    public void deletePage(Table table, String pathName) throws IOException, ClassNotFoundException {
-        table.getPaths().remove(pathName);
-        table.setPageCounter(table.getPageCounter()-1);
-        //File file=new File()
-        //delete file how??? O.o hi
-    }
-
+    
     public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
         int low = 0;
         int high = tuples.size()-1;
@@ -209,7 +202,6 @@ public class DBApp {
         String row;
         String[] arr;
         Object clusteringKeyValue = null;
-        boolean updated=false;
         while((row = br.readLine()) != null){
             arr = row.split(", ");
             if(arr[0].equals(strTableName)) {
@@ -261,9 +253,15 @@ public class DBApp {
         }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         throw new DBAppException("Cannot update");
-        ///check validity of update values.
      }
-
+     
+    public void updateInPage(Page page,int index,Hashtable<String,Object> htblColNameValue) throws IOException {
+        for(String key: htblColNameValue.keySet()){
+            Object value = htblColNameValue.get(key);
+            page.getTuplesInPage().get(index).getValues().put(key,value);
+        }
+    }
+    
     public void deleteFromTable(String strTableName,
                                 Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException {
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
@@ -292,32 +290,24 @@ public class DBApp {
                 }
             }
             if(indexInPage!=-1){
-                deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
+                page.getTuplesInPage().remove(indexInPage);
+//                deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
                 if(page.getTuplesInPage().isEmpty()){
                     deletePage(table, pathName);
                 }
+                serializeObject(table, "src/Resources/" + strTableName + ".ser");
+                serializeObject(page, page.getPath());
                 return;
             }
+            serializeObject(page, page.getPath());
         }
-        throw new DBAppException();
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        throw new DBAppException("Tuple Not found");
     }
-    public void deleteFromPage(Page page,int index,Object primaryKey,String primaryKeyName){
-        // if(primaryKey.equals(page.getMaxValInPage())){
-        //     Tuple tuple=page.getTuplesInPage().get(index-1);
-        //     Object value = tuple.getPrimaryKey();
-        //     page.setMaxValInPage(value);
-        // }else if(primaryKey.equals(page.getMinValInPage())){
-        //     Tuple tuple=page.getTuplesInPage().get(index-1);
-        //     Object value = tuple.getPrimaryKey();
-        //     page.setMinValInPage(value);
-        // // }
-        page.getTuplesInPage().remove(index);
-    }
-
-    public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
-            throws DBAppException{
-        //wow such a useful method -mariam
-        return null;
+    
+    public void deletePage(Table table, String pathName) throws IOException, ClassNotFoundException {
+        table.getPaths().remove(pathName);
+        table.setPageCounter(table.getPageCounter()-1);
     }
 
     public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
@@ -383,30 +373,11 @@ public class DBApp {
         }
         return foundTableName;
     }
-
-    public void updateInPage(Page page,int index,Hashtable<String,Object> htblColNameValue) throws IOException {
-         for(String key: htblColNameValue.keySet()){
-             Object value = htblColNameValue.get(key);
-             page.getTuplesInPage().get(index).getValues().put(key,value);
-         }
+    
+    public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
+            throws DBAppException{
+        return null;
     }
-
-    // public String getPrimaryKeyName(String strTableName) throws IOException, DBAppException { //returns column name
-    //     FileReader oldMetaDataFile = new FileReader("src/main/resources/metadata.csv");
-    //     BufferedReader br = new BufferedReader(oldMetaDataFile);
-    //     String row = br.readLine();
-    //     String[] arr = row.split(",");
-    //     while(row!=null){
-    //         arr = row.split(",");
-    //         if(arr[0] == strTableName) {
-    //             if(Boolean.parseBoolean(arr[3])){
-    //                 return arr[1];
-    //             }
-    //         }
-    //         row = br.readLine();
-    //     }
-    //     throw new DBAppException("No primary key found");
-    // }
     
     protected Object deserializeObject(String path) throws IOException, ClassNotFoundException {
         FileInputStream fileIn = new FileInputStream(path);
