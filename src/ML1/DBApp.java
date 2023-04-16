@@ -11,69 +11,72 @@ import java.util.*;
 public class DBApp {
 
      public static void main(String[] args) throws IOException, DBAppException, ClassNotFoundException, ParseException{
-//         String strTableName = "Student";
-//         DBApp dbApp = new DBApp( );
-//         dbApp.init();
-//         //////creating table:
-//         Hashtable htblColNameType = new Hashtable();
-//         htblColNameType.put("id", "java.lang.Integer");
-//         htblColNameType.put("name", "java.lang.String");
-//         htblColNameType.put("gpa", "java.lang.double");
-//         Hashtable <String, String> colMin = new Hashtable<>();
-//         colMin.put("id", "0");
-//         colMin.put("name", "A");
-//         colMin.put("gpa", "0");
-//         Hashtable <String, String> colMax = new Hashtable<>();
-//         colMax.put("id", "100");
-//         colMax.put("name", "zzzzzz");
-//         colMax.put("gpa","4");
-//         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
-//
-//         //////inserting into table:
-//         Hashtable htblColNameValue = new Hashtable( );
-//         htblColNameValue.put("id", new Integer( 19 ));
-//         htblColNameValue.put("name", new String("Mariam Maarek" ) );
-//         htblColNameValue.put("gpa", new Double( 0.87) );
-//         dbApp.insertIntoTable( strTableName , htblColNameValue );
-//         Hashtable htblColNameValue2 = new Hashtable( );
-//         htblColNameValue2.put("id", new Integer( 20 ));
-//         htblColNameValue2.put("name", new String("Nairuzy" ) );
-//         htblColNameValue2.put("gpa", new Double( 4.0) );
-//         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
+         String strTableName = "Student";
+         DBApp dbApp = new DBApp( );
+         dbApp.init();
+         //////creating table:
+         Hashtable htblColNameType = new Hashtable();
+         htblColNameType.put("id", "java.lang.Integer");
+         htblColNameType.put("name", "java.lang.String");
+         htblColNameType.put("gpa", "java.lang.double");
+         Hashtable <String, String> colMin = new Hashtable<>();
+         colMin.put("id", "0");
+         colMin.put("name", "A");
+         colMin.put("gpa", "0");
+         Hashtable <String, String> colMax = new Hashtable<>();
+         colMax.put("id", "100");
+         colMax.put("name", "zzzzzz");
+         colMax.put("gpa","4");
+         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
+         //////inserting into table:
+         Hashtable htblColNameValue = new Hashtable( );
+         htblColNameValue.put("id", new Integer( 19 ));
+         htblColNameValue.put("name", new String("Mariam Maarek" ) );
+         htblColNameValue.put("gpa", new Double( 0.87) );
+         dbApp.insertIntoTable( strTableName , htblColNameValue );
+         Hashtable htblColNameValue2 = new Hashtable( );
+         htblColNameValue2.put("id", new Integer( 20 ));
+         htblColNameValue2.put("name", new String("Nairuzy" ) );
+         htblColNameValue2.put("gpa", new Double( 4.0) );
+         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
+         Hashtable htblColNameValue3 = new Hashtable( );
+         htblColNameValue3.put("id", new Integer( 22));
+         htblColNameValue3.put("name", new String("Frfr" ) );
+         htblColNameValue3.put("gpa", new Double( 4.0) );
+         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
 //          System.out.println(table.getPaths().get(0));
 //          dbApp.deleteFromTable(strTableName, toDelete);
          
+         System.out.println("before:");
+         Page page = (Page)dbApp.deserializeObject("src/Resources/Student0.ser");
+         for(Tuple t: page.getTuplesInPage()){
+             for(String key: t.getValues().keySet()){
+                 System.out.println(key + " value: " + t.getValues().get(key).toString());
+             }
+         }
+         dbApp.serializeObject(page, "src/Resources/Student0.ser");
+         
+         
          //////deleting from table:
+         Hashtable toDelete = new Hashtable( );
+         toDelete.put("gpa", new Double( 4.0 ) );
+         dbApp.deleteFromTable(strTableName, toDelete);
          
-//         Hashtable toDelete = new Hashtable( );
-//         toDelete.put("id", new Integer( 12 ));
-//         toDelete.put("name", new String("Ahmed Noor" ) );
-//         toDelete.put("gpa", new Double( 0.95 ) );
-//         dbApp.deleteFromTable(strTableName, htblColNameValue);
-//
-//         System.out.println("before:");
-//         Page page = (Page)dbApp.deserializeObject("src/Resources/Student
-//                 System.out.println(key + " value: " + t.getValues().get(key).toString());
-//             }
-//         }
-         
-//         dbApp.serializeObject(table, "src/Resources/Student.ser");
-//         dbApp.serializeObject(page, "src/Resources/Student0.ser");
          ////////updating table:
 //         Hashtable htblColNameValue3 = new Hashtable( );
 //         htblColNameValue3.put("gpa", new Double( 0.7) );
 //         dbApp.updateTable(strTableName, "20", htblColNameValue3);
 //
-//         System.out.println();
-//         System.out.println("after:");
-//         Page page1 = (Page) dbApp.deserializeObject("src/Resources/Student0.ser");
-//         for(Tuple t: page1.getTuplesInPage()){
-//             for(String key: t.getValues().keySet()){
-//                 System.out.println(key + " value: " + t.getValues().get(key).toString());
-//             }
-//         }
-
+         System.out.println();
+         System.out.println("after:");
+         Page page1 = (Page) dbApp.deserializeObject("src/Resources/Student0.ser");
+         for(Tuple t: page1.getTuplesInPage()){
+             for(String key: t.getValues().keySet()){
+                 System.out.println(key + " value: " + t.getValues().get(key).toString());
+             }
+         }
+         dbApp.serializeObject(page1, "src/Resources/Student0.ser");
      }
 
     public void init() throws IOException {
@@ -196,7 +199,7 @@ public class DBApp {
 
     public void updateTable(String strTableName,String strClusteringKeyValue,
                             Hashtable<String,Object> htblColNameValue ) throws DBAppException, IOException, ClassNotFoundException, ParseException {
-         if(!isValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values!");
+         if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values!");
         Table table=(Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
@@ -308,7 +311,7 @@ public class DBApp {
     }
 
     public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException, ParseException {
-        if(!isValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
+        if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
 
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
@@ -318,7 +321,7 @@ public class DBApp {
             for(String path:table.getPaths()){
                 Page page=(Page)deserializeObject(path);
                 for(Tuple record:page.getTuplesInPage()){
-                    Boolean allConditionsMet=true;
+                    boolean allConditionsMet=true;
                     for(String key: htblColNameValue.keySet()){
                         if(!(record.getValues().get(key).equals(htblColNameValue.get(key)))){
                             allConditionsMet=false;
@@ -328,19 +331,17 @@ public class DBApp {
                     if(allConditionsMet){
                       page.getTuplesInPage().remove(record);
                     }
-
                 }
                 if(page.getTuplesInPage().isEmpty()){
                     deletePage(table,path);
-                }
-                else {
+                }else {
                     serializeObject(page,page.getPath());
                 }
             }
         }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
-
     }
+    
     public void deletePage(Table table, String pathName) throws IOException, ClassNotFoundException {
         table.getPaths().remove(pathName);
         Path path= Paths.get(pathName);
@@ -392,7 +393,7 @@ public class DBApp {
                     if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
                         return false;
                     }
-                }else{
+                }else if(colType.equals("java.lang.double")){
                     if(!(object instanceof java.lang.Double)){
                         return false;
                     }
@@ -402,12 +403,70 @@ public class DBApp {
                         return false;
                     }
                 }
-
             }
             row = br.readLine();
         }
         if(countOfCols != htblColNameValue.size()){
             return false;
+        }
+        return foundTableName;
+    }
+    
+    public boolean someAreValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
+        FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
+        BufferedReader br = new BufferedReader(oldMetaDataFile);
+        String row;
+        String[] arr;
+        boolean foundTableName = false;
+        while((row = br.readLine())!=null){
+            arr = row.split(", ");
+            if(arr[0].equals(strTableName)){
+                foundTableName = true;
+                String colName = arr[1];
+                String colType = arr[2].toLowerCase();
+                String min = arr[6];
+                String max = arr[7];
+                Object object = htblColNameValue.get(colName);
+                if(object == null){
+                    continue;
+                }
+                if(colType.equals("java.lang.integer")){
+                    if(!(object instanceof java.lang.Integer)){
+                        return false;
+                    }
+                    int minI = Integer.parseInt(min);
+                    int maxI = Integer.parseInt(max);
+                    if(((Integer)object)<minI || ((Integer)object)>maxI){
+                        return false;
+                    }
+                }else if(colType.equals("java.lang.string")){
+                    if(!(object instanceof java.lang.String)){
+                        return false;
+                    }
+                    if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
+                        return false;
+                    }
+                }else if(colType.equals("java.util.date")){
+                    if(!(object instanceof java.util.Date)){
+                        return false;
+                    }
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    Date minDate = formatter.parse(min);
+                    Date maxDate = formatter.parse(max);
+                    if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
+                        return false;
+                    }
+                }else if(colType.equals("java.lang.double")){
+                    if(!(object instanceof java.lang.Double)){
+                        return false;
+                    }
+                    double minD = Double.parseDouble(min);
+                    double maxD = Double.parseDouble(max);
+                    if(((Double)object)<minD || ((Double)object)>maxD){
+                        return false;
+                    }
+                }
+            }
         }
         return foundTableName;
     }
