@@ -22,11 +22,11 @@ public class DBApp {
          Hashtable <String, String> colMin = new Hashtable<>();
          colMin.put("id", "0");
          colMin.put("name", "A");
-         colMin.put("gpa", "0");
+         colMin.put("gpa", "0.0");
          Hashtable <String, String> colMax = new Hashtable<>();
          colMax.put("id", "100");
-         colMax.put("name", "zzzzzz");
-         colMax.put("gpa","4");
+         colMax.put("name", "ZZZZZZZZZZZ");
+         colMax.put("gpa","5.0");
          dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
          //////inserting into table:
@@ -296,6 +296,8 @@ public class DBApp {
             }
             if(indexInPage!=-1){
                 page.getTuplesInPage().remove(indexInPage);
+                page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
+                page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
 //                deleteFromPage(page, indexInPage, primaryKey, primaryKeyName);
                 if(page.getTuplesInPage().isEmpty()){
                     deletePage(table, pathName);
@@ -335,6 +337,8 @@ public class DBApp {
                 if(page.getTuplesInPage().isEmpty()){
                     deletePage(table,path);
                 }else {
+                    page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
+                    page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
                     serializeObject(page,page.getPath());
                 }
             }
