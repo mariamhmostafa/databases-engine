@@ -30,11 +30,11 @@ public class DBApp {
          dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
          //////inserting into table:
-         Hashtable htblColNameValue = new Hashtable( );
-         htblColNameValue.put("id", new Integer( 19 ));
-         htblColNameValue.put("name", new String("Mariam Maarek" ) );
-         htblColNameValue.put("gpa", new Double( 0.87) );
-         dbApp.insertIntoTable( strTableName , htblColNameValue );
+         Hashtable htblColNameValue1 = new Hashtable( );
+         htblColNameValue1.put("id", new Integer( 19 ));
+         htblColNameValue1.put("name", new String("Mariam Maarek" ) );
+         htblColNameValue1.put("gpa", new Double( 0.87) );
+         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
          Hashtable htblColNameValue2 = new Hashtable( );
          htblColNameValue2.put("id", new Integer( 20 ));
          htblColNameValue2.put("name", new String("Nairuzy" ) );
@@ -314,7 +314,6 @@ public class DBApp {
 
     public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException, ParseException {
         if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
-
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
         Object primaryKey = htblColNameValue.get(primaryKeyName);
@@ -322,6 +321,7 @@ public class DBApp {
         else{
             for(String path:table.getPaths()){
                 Page page=(Page)deserializeObject(path);
+                LinkedList<Tuple> toDelete= new LinkedList<>();
                 for(Tuple record:page.getTuplesInPage()){
                     boolean allConditionsMet=true;
                     for(String key: htblColNameValue.keySet()){
@@ -331,8 +331,11 @@ public class DBApp {
                         }
                     }
                     if(allConditionsMet){
-                      page.getTuplesInPage().remove(record);
+                      toDelete.add(record);
                     }
+                }
+                while(!toDelete.isEmpty()){
+                    page.getTuplesInPage().remove(toDelete.remove());
                 }
                 if(page.getTuplesInPage().isEmpty()){
                     deletePage(table,path);
