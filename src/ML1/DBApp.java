@@ -45,30 +45,49 @@ public class DBApp {
         htblColNameValue3.put("name", new String("Frfr" ) );
         htblColNameValue3.put("gpa", new Double( 4.0) );
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
+        Hashtable htblColNameValue4 = new Hashtable( );
+        htblColNameValue4.put("id", new Integer( 18));
+        htblColNameValue4.put("name", new String("Marwa" ) );
+        htblColNameValue4.put("gpa", new Double( 3.0) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue4 );
+        Hashtable htblColNameValue5 = new Hashtable( );
+        htblColNameValue5.put("id", new Integer( 17));
+        htblColNameValue5.put("name", new String("Sarah" ) );
+        htblColNameValue5.put("gpa", new Double( 3.0) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue5 );
+        Hashtable htblColNameValue6 = new Hashtable( );
+        htblColNameValue6.put("id", new Integer( 16));
+        htblColNameValue6.put("name", new String("Farwa" ) );
+        htblColNameValue6.put("gpa", new Double( 2.6) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue6 );
 
 //          System.out.println(table.getPaths().get(0));
 //          dbApp.deleteFromTable(strTableName, toDelete);
 
-//         System.out.println("before:");
-//         Page page = (Page)dbApp.deserializeObject("src/Resources/Student0.ser");
-//         for(Tuple t: page.getTuplesInPage()){
-//             for(String key: t.getValues().keySet()){
-//                 System.out.println(key + " value: " + t.getValues().get(key).toString());
-//             }
-//         }
-//         dbApp.serializeObject(page, "src/Resources/Student0.ser");
+         System.out.println("before:");
+         Table table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
+         for(String p: table.getPaths()) {
+             Page page = (Page) dbApp.deserializeObject(p);
+             for (Tuple t : page.getTuplesInPage()) {
+                 for (String key : t.getValues().keySet()) {
+                     System.out.println(key + " value: " + t.getValues().get(key).toString());
+                 }
+             }
+             dbApp.serializeObject(page, p);
+         }
+        dbApp.serializeObject(table, "src/Resources/Student.ser");
 
 
         //////deleting from table:
-         Hashtable toDelete = new Hashtable( );
-         toDelete.put("gpa", new Double( 4.0 ) );
-         dbApp.deleteFromTable(strTableName, toDelete);
-
-         toDelete.put("gpa", new Double( 0.87 ) );
-         dbApp.deleteFromTable(strTableName, toDelete);
-
-         Table test = (Table) dbApp.deserializeObject("src/Resources/Student.ser");
-         System.out.println(test.getPaths().size());
+//         Hashtable toDelete = new Hashtable( );
+//         toDelete.put("gpa", new Double( 4.0 ) );
+//         dbApp.deleteFromTable(strTableName, toDelete);
+//
+//         toDelete.put("gpa", new Double( 0.87 ) );
+//         dbApp.deleteFromTable(strTableName, toDelete);
+//
+//         Table test = (Table) dbApp.deserializeObject("src/Resources/Student.ser");
+//         System.out.println(test.getPaths().size());
 
         ////////updating table:
 //         Hashtable htblColNameValue3 = new Hashtable( );
@@ -149,14 +168,15 @@ public class DBApp {
         page.getTuplesInPage().add(i, newtuple);
         while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
             Tuple lasttuple = page.getTuplesInPage().lastElement();
+            serializeObject(page, page.getPath());
+            value = (Comparable) lasttuple.getValues().get(primaryKey);
+            deleteFromTable(strTableName, lasttuple.getValues());
             if(pathi==table.getPageCounter()-1){
                 createPage(table, lasttuple);
                 serializeObject(table, "src/Resources/" + strTableName + ".ser");
                 return;
             }
             pathName = table.paths.get(++pathi);
-            deleteFromTable(strTableName, lasttuple.getValues());
-            serializeObject(page, page.getPath());
             page = (Page)deserializeObject(pathName);
             i = getNewIndex(page.getTuplesInPage(), value);
             page.getTuplesInPage().add(i, newtuple);
