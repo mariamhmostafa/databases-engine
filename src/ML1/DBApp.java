@@ -32,7 +32,7 @@ public class DBApp {
         //////inserting into table:
         Hashtable htblColNameValue1 = new Hashtable( );
         htblColNameValue1.put("id", new Integer( 19 ));
-        htblColNameValue1.put("name", new String("Mariam Maarek" ) );
+        htblColNameValue1.put("name", new String("Mariam" ) );
         htblColNameValue1.put("gpa", new Double( 0.87) );
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
         Hashtable htblColNameValue2 = new Hashtable( );
@@ -60,6 +60,16 @@ public class DBApp {
         htblColNameValue6.put("name", new String("Farwa" ) );
         htblColNameValue6.put("gpa", new Double( 2.6) );
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
+    
+        Hashtable toDelete = new Hashtable();
+        toDelete.put("name", "Sarah" );
+        dbApp.deleteFromTable(strTableName, toDelete);
+    
+        Hashtable htblColNameValue7 = new Hashtable();
+        htblColNameValue7.put("id", 24);
+        htblColNameValue7.put("name", new String("Sarah" ) );
+        htblColNameValue7.put("gpa", 3.0);
+        dbApp.insertIntoTable( strTableName , htblColNameValue7 );
 
 //          System.out.println(table.getPaths().get(0));
 //          dbApp.deleteFromTable(strTableName, toDelete);
@@ -68,6 +78,8 @@ public class DBApp {
          Table table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
          for(String p: table.getPaths()) {
              Page page = (Page) dbApp.deserializeObject(p);
+             System.out.println();
+             System.out.println("next Page:");
              for (Tuple t : page.getTuplesInPage()) {
                  for (String key : t.getValues().keySet()) {
                      System.out.println(key + " value: " + t.getValues().get(key).toString());
@@ -78,20 +90,18 @@ public class DBApp {
         dbApp.serializeObject(table, "src/Resources/Student.ser");
 
 
-        //////deleting from table:
+        ////deleting from table:
 //         Hashtable toDelete = new Hashtable( );
-//         toDelete.put("gpa", new Double( 4.0 ) );
+//         toDelete.put("name", "Sarah" );
 //         dbApp.deleteFromTable(strTableName, toDelete);
 //
-//         toDelete.put("gpa", new Double( 0.87 ) );
-//         dbApp.deleteFromTable(strTableName, toDelete);
 //
 //         Table test = (Table) dbApp.deserializeObject("src/Resources/Student.ser");
 //         System.out.println(test.getPaths().size());
 
         ////////updating table:
 //         Hashtable htblColNameValue3 = new Hashtable( );
-//         htblColNameValue3.put("gpa", new Double( 0.7) );
+//         htblColNameValue3.put("gpa", 0.7 );
 //         dbApp.updateTable(strTableName, "20", htblColNameValue3);
 //
 //         System.out.println();
@@ -156,27 +166,31 @@ public class DBApp {
         String primaryKey = table.getStrClusteringKeyColumn();
         Comparable value = (Comparable) htblColNameValue.get(primaryKey);
         Tuple newtuple = new Tuple(htblColNameValue, value);
-        if(table.getPageCounter()==0){
+        if(table.getPaths().isEmpty()){
             createPage(table, newtuple);
             serializeObject(table, "src/Resources/" + strTableName + ".ser");
             return;
         }
-        int pathi = 0;
-        String pathName = table.paths.get(pathi);
+        int pathi = getPageIndex(table, newtuple);
+        String pathName = table.getPaths().get(pathi);
         Page page = (Page)deserializeObject(pathName);
         int i = getNewIndex(page.getTuplesInPage(), value);
         page.getTuplesInPage().add(i, newtuple);
+        if(page.getTuplesInPage().size() <= Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
+            page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
+            page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
+        }
         while(page.getTuplesInPage().size() > Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))){
             Tuple lasttuple = page.getTuplesInPage().lastElement();
             serializeObject(page, page.getPath());
             value = (Comparable) lasttuple.getValues().get(primaryKey);
             deleteFromTable(strTableName, lasttuple.getValues());
-            if(pathi==table.getPageCounter()-1){
+            if(pathi==table.getPaths().size()-1){
                 createPage(table, lasttuple);
                 serializeObject(table, "src/Resources/" + strTableName + ".ser");
                 return;
             }
-            pathName = table.paths.get(++pathi);
+            pathName = table.getPaths().get(++pathi);
             page = (Page)deserializeObject(pathName);
             i = getNewIndex(page.getTuplesInPage(), value);
             page.getTuplesInPage().add(i, newtuple);
@@ -194,6 +208,18 @@ public class DBApp {
         page.getTuplesInPage().add(newtuple);
         table.getPaths().add(page.getPath());
         serializeObject(page, page.getPath());
+    }
+    
+    public int getPageIndex(Table table, Tuple tuple) throws IOException, ClassNotFoundException {
+        int pageIndex =0;
+        for(int i=1; i< table.getPaths().size(); i++){
+            Page page = (Page)deserializeObject(table.getPaths().get(i));
+            if(((Comparable)page.getMinValInPage()).compareTo((Comparable)(tuple.getPrimaryKey()))<0){
+                pageIndex = i;
+            }
+            serializeObject(page, table.getPaths().get(i));
+        }
+        return pageIndex;
     }
     
     public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
@@ -392,7 +418,6 @@ public class DBApp {
         table.getPaths().remove(pathName);
         Path path= Paths.get(pathName);
         Files.deleteIfExists(path);
-        table.setPageCounter(table.getPageCounter()-1);
     }
 
     public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
