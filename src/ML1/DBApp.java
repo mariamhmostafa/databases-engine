@@ -57,11 +57,13 @@ public class DBApp {
 //             }
 //         }
 //         dbApp.serializeObject(page, "src/Resources/Student0.ser");
-//
-//
+
+
         //////deleting from table:
          Hashtable toDelete = new Hashtable( );
          toDelete.put("gpa", new Double( 4.0 ) );
+         dbApp.deleteFromTable(strTableName, toDelete);
+
          toDelete.put("gpa", new Double( 0.87 ) );
          dbApp.deleteFromTable(strTableName, toDelete);
 
@@ -332,6 +334,7 @@ public class DBApp {
         Object primaryKey = htblColNameValue.get(primaryKeyName);
         if(primaryKey!=null) {deleteFromTable2(strTableName,htblColNameValue);}
         else{
+            LinkedList <String> pagesToDelete = new LinkedList <>();
             for(String path:table.getPaths()){
                 Page page=(Page)deserializeObject(path);
                 LinkedList<Tuple> toDelete= new LinkedList<>();
@@ -351,12 +354,15 @@ public class DBApp {
                     page.getTuplesInPage().remove(toDelete.remove());
                 }
                 if(page.getTuplesInPage().isEmpty()){
-                    deletePage(table,path);
+                    pagesToDelete.add(path);
                 }else {
                     page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
                     page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
                     serializeObject(page,page.getPath());
                 }
+            }
+            while(!pagesToDelete.isEmpty()){
+                deletePage(table,pagesToDelete.remove());
             }
         }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
