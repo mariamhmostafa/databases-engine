@@ -373,9 +373,10 @@ public class DBApp {
         throw new DBAppException("Tuple Not found");
     }
 
-    public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ClassNotFoundException, ParseException {
+    public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ParseException, ClassNotFoundException {
         if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
-        Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
+        Table table = null;
+        table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
         Object primaryKey = htblColNameValue.get(primaryKeyName);
         if(primaryKey!=null) {deleteFromTable2(strTableName,htblColNameValue);}
@@ -420,24 +421,30 @@ public class DBApp {
         Files.deleteIfExists(path);
     }
 
-    public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
+    public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException, ClassNotFoundException, DBAppException {
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row = br.readLine();
         String[] arr;
         boolean foundTableName = false;
-        int countOfCols = 0;
         while(row!=null){
             arr = row.split(", ");
             if(arr[0].equals(strTableName)){
                 foundTableName = true;
-                countOfCols++;
                 String colName = arr[1];
                 String colType = arr[2].toLowerCase();
                 String min = arr[6];
                 String max = arr[7];
                 Object object = htblColNameValue.get(colName);
-
+                Table table = (Table)deserializeObject("src/resources/" + strTableName + ".ser");
+                String primaryKeyName = table.getStrClusteringKeyColumn();
+                Object primaryKey = htblColNameValue.get(primaryKeyName);
+                if(primaryKey == null){
+                    throw new DBAppException("Primary key cannot be null");
+                }
+                if(object == null){
+                    continue;
+                }
                 if(colType.equals("java.lang.integer")){
                     if(!(object instanceof java.lang.Integer)){
                         return false;
@@ -476,9 +483,6 @@ public class DBApp {
                 }
             }
             row = br.readLine();
-        }
-        if(countOfCols != htblColNameValue.size()){
-            return false;
         }
         return foundTableName;
     }
