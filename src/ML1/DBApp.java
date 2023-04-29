@@ -245,6 +245,9 @@ public class DBApp {
         return true;
     }
 
+
+
+   // checkIfContainsAllColumns(strTable)
     public void insertIntoTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ParseException, ClassNotFoundException {
         if(!isValid(strTableName, htblColNameValue)){
             throw new DBAppException("not valid :(");
@@ -252,6 +255,7 @@ public class DBApp {
         Table table = (Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKey = table.getStrClusteringKeyColumn();
         Comparable value = (Comparable) htblColNameValue.get(primaryKey);
+
         Tuple newtuple = new Tuple(htblColNameValue, value);
         if(table.getPaths().isEmpty()){
             createPage(table, newtuple);
@@ -530,6 +534,7 @@ public class DBApp {
                     throw new DBAppException("Primary key cannot be null");
                 }
                 if(object == null){
+                    htblColNameValue.put(colName,new NullWrapper());
                     continue;
                 }
                 if(colType.equals("java.lang.integer")){
