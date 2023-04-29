@@ -125,7 +125,7 @@ public class DBApp {
 
         ////updating table:
          Hashtable htblUpdate = new Hashtable( );
-         htblUpdate.put("gpa", 0.7 );
+         htblUpdate.put("gpa", 3.0 );
 //         htblUpdate.put("id", 30);
         htblUpdate.put("name", "nairuzyyyyyyyyyy");
          dbApp.updateTable(strTableName, "20", htblUpdate);
@@ -145,6 +145,46 @@ public class DBApp {
         }
         dbApp.serializeObject(table, "src/Resources/Student.ser");
 
+
+        ////////////table 2:
+//        String strTableName2 = "Mariam";
+//        Hashtable htblColNameType2 = new Hashtable();
+//        htblColNameType2.put("mrm", "java.lang.Integer");
+//        htblColNameType2.put("mrom", "java.lang.String");
+//        htblColNameType2.put("marar", "java.lang.Double");
+////        htblColNameType.put("birthday", "java.lang.Date");
+//        Hashtable <String, String> colMin2 = new Hashtable<>();
+//        colMin2.put("mrm", "0");
+//        colMin2.put("mrom", "a");
+//        colMin2.put("marar", "0.0");
+//        //       colMin.put("birthday", "0000-00-00");
+//        Hashtable <String, String> colMax2 = new Hashtable<>();
+//        colMax2.put("mrm", "100");
+//        colMax2.put("mrom", "zzzzzzzzzzz");
+//        colMax2.put("marar","5.0");
+//        //       colMax.put("birthday", "3000-00-00");
+//        dbApp.createTable( strTableName2, "mrm", htblColNameType2, colMin2, colMax2);
+//
+//        Hashtable htblUpdate2 = new Hashtable( );
+//        htblUpdate2.put("marar", 5 );
+////         htblUpdate.put("id", 30);
+//        htblUpdate2.put("mrom", "nairuzyyyyyyyyyy");
+//        dbApp.updateTable(strTableName2, "20", htblUpdate2);
+//
+//        System.out.println("update:");
+//        Table table2 = (Table)dbApp.deserializeObject("src/Resources/Mariam.ser");
+//        for(String p: table2.getPaths()) {
+//            Page page = (Page) dbApp.deserializeObject(p);
+//            System.out.println();
+//            System.out.println("next Page:");
+//            for (Tuple t : page.getTuplesInPage()) {
+//                for (String key : t.getValues().keySet()) {
+//                    System.out.println(key + " value: " + t.getValues().get(key).toString());
+//                }
+//            }
+//            dbApp.serializeObject(page, p);
+//        }
+//        dbApp.serializeObject(table2, "src/Resources/Mariam.ser");
 
 
 //         System.out.println();
@@ -335,12 +375,12 @@ public class DBApp {
         return mid;
     }
 
-    public int getNewIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
+    public int getNewIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
         int low = 0;
         int high = tuples.size()-1;
         int mid=0;
         while(low<=high){
-            mid = ((high-low)/2) + low; // 1 0 0
+            mid = ((high-low)/2) + low;
             Comparable tupleVal = (Comparable)tuples.get(mid).getPrimaryKey();
             if(tupleVal.equals(value)){
                 throw new DBAppException("duplicate primary key");
@@ -353,17 +393,6 @@ public class DBApp {
         return low;
     }
 
-
-//    Update record
-//* Update clustering key (rejected)
-//* Update multiple columns
-//* Update record with no primary key (rejected) ------> test it
-//* Update record that doesnt exist (rejected)
-//* Update record with different data types than table (rejected)
-//* Update record with different columns than table (rejected)
-//* Update record exceeding max of column (rejected)
-//* Update record less than min of column (rejected)
-//* Update record to an empty table
     public void updateTable(String strTableName,String strClusteringKeyValue,
                             Hashtable<String,Object> htblColNameValue ) throws DBAppException, IOException, ClassNotFoundException, ParseException {
          if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values!");
@@ -371,6 +400,9 @@ public class DBApp {
         String primaryKeyName = table.getStrClusteringKeyColumn();
         if(htblColNameValue.containsKey(primaryKeyName)){
             throw new DBAppException("Cannot Update primary key");
+        }
+        if(strClusteringKeyValue.equals("")){
+            throw new DBAppException("Primary key cannot be empty");
         }
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
@@ -552,51 +584,41 @@ public class DBApp {
                     throw new DBAppException("Primary key cannot be null");
                 }
                 if(object == null){
-                    System.out.println(colName);
                     htblColNameValue.put(colName,new NullWrapper());
                     continue;
-                }
-                else if(colType.equals("java.lang.integer")){
+                }else if(colType.equals("java.lang.integer")){
                     if(!(object instanceof java.lang.Integer)){
-                        System.out.print("integer case");
                         return false;
                     }
                     int minI = Integer.parseInt(min);
                     int maxI = Integer.parseInt(max);
                     if(((Integer)object)<minI || ((Integer)object)>maxI){
-                        System.out.print("maxMin prob");
                         return false;
                     }
                 }else if(colType.equals("java.lang.string")){
                     if(!(object instanceof java.lang.String)){
-                        System.out.println("string case");
                         return false;
                     }
                     if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
-                        System.out.println("maxMinString");
                         return false;
                     }
                 }else if(colType.equals("java.util.date")){
                     if(!(object instanceof java.util.Date)){
-                        System.out.println("date case");
                         return false;
                     }
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     Date minDate = formatter.parse(min);
                     Date maxDate = formatter.parse(max);
                     if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
-                        System.out.println("min max date");
                         return false;
                     }
                 }else if(colType.equals("java.lang.double")){
                     if(!(object instanceof java.lang.Double)){
-                        System.out.println("double");
                         return false;
                     }
                     double minD = Double.parseDouble(min);
                     double maxD = Double.parseDouble(max);
                     if(((Double)object)<minD || ((Double)object)>maxD){
-                        System.out.println("min max double");
                         return false;
                     }
                 }
@@ -605,11 +627,12 @@ public class DBApp {
         return foundTableName;
     }
     
-    public boolean someAreValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException {
+    public boolean someAreValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException, DBAppException {
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row;
         String[] arr;
+        int counterUpdate=0;
         boolean foundTableName = false;
         while((row = br.readLine())!=null){
             arr = row.split(", ");
@@ -631,14 +654,14 @@ public class DBApp {
                     int maxI = Integer.parseInt(max);
                     if(((Integer)object)<minI || ((Integer)object)>maxI){
                         return false;
-                    }
+                    } counterUpdate++;
                 }else if(colType.equals("java.lang.string")){
                     if(!(object instanceof java.lang.String)){
                         return false;
                     }
                     if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
                         return false;
-                    }
+                    }counterUpdate++;
                 }else if(colType.equals("java.util.date")){
                     if(!(object instanceof java.util.Date)){
                         return false;
@@ -648,7 +671,7 @@ public class DBApp {
                     Date maxDate = formatter.parse(max);
                     if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
                         return false;
-                    }
+                    } counterUpdate++;
                 }else if(colType.equals("java.lang.double")){
                     if(!(object instanceof java.lang.Double)){
                         return false;
@@ -657,10 +680,11 @@ public class DBApp {
                     double maxD = Double.parseDouble(max);
                     if(((Double)object)<minD || ((Double)object)>maxD){
                         return false;
-                    }
+                    } counterUpdate++;
                 }
             }
         }
+        if(!(counterUpdate ==htblColNameValue.size())) throw new DBAppException("columns not found");
         return foundTableName;
     }
     
