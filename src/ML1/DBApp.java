@@ -18,7 +18,7 @@ public class DBApp {
         Hashtable htblColNameType = new Hashtable();
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
-        htblColNameType.put("gpa", "java.lang.double");
+        htblColNameType.put("married", "boolean");
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "A");
@@ -57,38 +57,57 @@ public class DBApp {
         dbApp.insertIntoTable( strTableName , htblColNameValue5 );
         Hashtable htblColNameValue6 = new Hashtable( );
         htblColNameValue6.put("id", new Integer( 16));
-        htblColNameValue6.put("name", new String("Farwa" ) );
+        htblColNameValue6.put("name", new String("Sarah" ) );
         htblColNameValue6.put("gpa", new Double( 2.6) );
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
-    
+
+        System.out.println("Insert:");
+        Table table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
+        for(String p: table.getPaths()) {
+            Page page = (Page) dbApp.deserializeObject(p);
+            System.out.println();
+            System.out.println("next Page:");
+            for (Tuple t : page.getTuplesInPage()) {
+                for (String key : t.getValues().keySet()) {
+                    System.out.println(key + " value: " + t.getValues().get(key).toString());
+                }
+            }
+            dbApp.serializeObject(page, p);
+        }
+        dbApp.serializeObject(table, "src/Resources/Student.ser");
+
+
+
         Hashtable toDelete = new Hashtable();
         toDelete.put("name", "Sarah" );
+        toDelete.put("gpa", new Double( 3.0));
         dbApp.deleteFromTable(strTableName, toDelete);
-    
-        Hashtable htblColNameValue7 = new Hashtable();
-        htblColNameValue7.put("id", 24);
-        htblColNameValue7.put("name", new String("Sarah" ) );
-        htblColNameValue7.put("gpa", 3.0);
-        dbApp.insertIntoTable( strTableName , htblColNameValue7 );
+
+        System.out.println("delete:");
+        table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
+        for(String p: table.getPaths()) {
+            Page page = (Page) dbApp.deserializeObject(p);
+            System.out.println();
+            System.out.println("next Page:");
+            for (Tuple t : page.getTuplesInPage()) {
+                for (String key : t.getValues().keySet()) {
+                    System.out.println(key + " value: " + t.getValues().get(key).toString());
+                }
+            }
+            dbApp.serializeObject(page, p);
+        }
+        dbApp.serializeObject(table, "src/Resources/Student.ser");
+
+
+
+//        Hashtable htblColNameValue7 = new Hashtable();
+//        htblColNameValue7.put("id", 24);
+//        htblColNameValue7.put("name", new String("Sarah" ) );
+//        htblColNameValue7.put("gpa", 3.0);
+//        dbApp.insertIntoTable( strTableName , htblColNameValue7 );
 
 //          System.out.println(table.getPaths().get(0));
 //          dbApp.deleteFromTable(strTableName, toDelete);
-
-         System.out.println("before:");
-         Table table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
-         for(String p: table.getPaths()) {
-             Page page = (Page) dbApp.deserializeObject(p);
-             System.out.println();
-             System.out.println("next Page:");
-             for (Tuple t : page.getTuplesInPage()) {
-                 for (String key : t.getValues().keySet()) {
-                     System.out.println(key + " value: " + t.getValues().get(key).toString());
-                 }
-             }
-             dbApp.serializeObject(page, p);
-         }
-        dbApp.serializeObject(table, "src/Resources/Student.ser");
-
 
         ////deleting from table:
 //         Hashtable toDelete = new Hashtable( );
@@ -99,11 +118,28 @@ public class DBApp {
 //         Table test = (Table) dbApp.deserializeObject("src/Resources/Student.ser");
 //         System.out.println(test.getPaths().size());
 
-        ////////updating table:
-//         Hashtable htblColNameValue3 = new Hashtable( );
-//         htblColNameValue3.put("gpa", 0.7 );
-//         dbApp.updateTable(strTableName, "20", htblColNameValue3);
-//
+        //////updating table:
+         htblColNameValue3 = new Hashtable( );
+         htblColNameValue3.put("gpa", 0.7 );
+         dbApp.updateTable(strTableName, "20", htblColNameValue3);
+
+        System.out.println("update:");
+        table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
+        for(String p: table.getPaths()) {
+            Page page = (Page) dbApp.deserializeObject(p);
+            System.out.println();
+            System.out.println("next Page:");
+            for (Tuple t : page.getTuplesInPage()) {
+                for (String key : t.getValues().keySet()) {
+                    System.out.println(key + " value: " + t.getValues().get(key).toString());
+                }
+            }
+            dbApp.serializeObject(page, p);
+        }
+        dbApp.serializeObject(table, "src/Resources/Student.ser");
+
+
+
 //         System.out.println();
 //         System.out.println("after:");
 //         Page page1 = (Page) dbApp.deserializeObject("src/Resources/Student0.ser");
@@ -141,6 +177,8 @@ public class DBApp {
         for(String colName : htblColNameType.keySet()){
             StringBuilder sb = new StringBuilder();
             String type = htblColNameType.get(colName);
+            if(!(type.toLowerCase().equals("java.lang.integer") || type.toLowerCase().equals("java.lang.string") || type.toLowerCase().equals("java.lang.double") || type.toLowerCase().equals("java.lang.date")))
+                throw new DBAppException("Data type incorrect:(");
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
             boolean clusteringKey = colName==strClusteringKeyColumn;
