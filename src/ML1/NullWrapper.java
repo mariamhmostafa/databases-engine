@@ -1,7 +1,10 @@
 package ML1;
 
-public class NullWrapper {
-    public NullWrapper(){
+import java.io.Serializable;
 
+public class NullWrapper implements Serializable {
+    public NullWrapper(){
     }
+
+
 }

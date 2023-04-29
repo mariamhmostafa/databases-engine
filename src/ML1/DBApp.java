@@ -19,35 +19,32 @@ public class DBApp {
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
         htblColNameType.put("gpa", "java.lang.Double");
-        htblColNameType.put("birthday", "java.lang.Date");
+//        htblColNameType.put("birthday", "java.lang.Date");
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "A");
         colMin.put("gpa", "0.0");
-        colMin.put("birthday", "java.lang.Date");
+ //       colMin.put("birthday", "0000-00-00");
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "ZZZZZZZZZZZ");
         colMax.put("gpa","5.0");
-        colMax.put("birthday", "0000-00-00");
+ //       colMax.put("birthday", "3000-00-00");
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
         //////inserting into table:
         Hashtable htblColNameValue1 = new Hashtable( );
         htblColNameValue1.put("id", new Integer( 19 ));
         htblColNameValue1.put("name", new String("Mariam" ) );
-        htblColNameValue1.put("gpa", new Double( 0.87) );
+//        htblColNameValue1.put("gpa", new Double( 0.87) );
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
         Hashtable htblColNameValue2 = new Hashtable( );
         htblColNameValue2.put("id", new Integer( 20 ));
         htblColNameValue2.put("name", new String("Nairuzy" ) );
         htblColNameValue2.put("gpa", new Double( 4.0) );
         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
-        Hashtable htblColNameValue3 = new Hashtable( );
-        htblColNameValue3.put("id", new Integer( 22));
-        htblColNameValue3.put("name", new String("Frfr" ) );
-        htblColNameValue3.put("gpa", new Double( 4.0) );
-        dbApp.insertIntoTable( strTableName , htblColNameValue3 );
+
+
         Hashtable htblColNameValue4 = new Hashtable( );
         htblColNameValue4.put("id", new Integer( 18));
         htblColNameValue4.put("name", new String("Marwa" ) );
@@ -63,6 +60,11 @@ public class DBApp {
         htblColNameValue6.put("name", new String("Sarah" ) );
         htblColNameValue6.put("gpa", new Double( 2.6) );
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
+        Hashtable htblColNameValue3 = new Hashtable( );
+        htblColNameValue3.put("id", new Integer( 26));
+        htblColNameValue3.put("name", new String("frfr" ) );
+        htblColNameValue3.put("gpa", new Double( 2.6) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue3 );
 
         System.out.println("Insert:");
         Table table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
@@ -122,9 +124,9 @@ public class DBApp {
 //         System.out.println(test.getPaths().size());
 
         //////updating table:
-         htblColNameValue3 = new Hashtable( );
-         htblColNameValue3.put("gpa", 0.7 );
-         dbApp.updateTable(strTableName, "20", htblColNameValue3);
+//         htblColNameValue3 = new Hashtable( );
+//         htblColNameValue3.put("gpa", 0.7 );
+//         dbApp.updateTable(strTableName, "20", htblColNameValue3);
 
         System.out.println("update:");
         table = (Table)dbApp.deserializeObject("src/Resources/Student.ser");
@@ -349,11 +351,25 @@ public class DBApp {
         return low;
     }
 
+
+//    Update record
+//* Update clustering key (rejected)
+//* Update multiple columns
+//* Update record with no primary key (rejected) ------> test it
+//* Update record that doesnt exist (rejected)
+//* Update record with different data types than table (rejected)
+//* Update record with different columns than table (rejected)
+//* Update record exceeding max of column (rejected)
+//* Update record less than min of column (rejected)
+//* Update record to an empty table
     public void updateTable(String strTableName,String strClusteringKeyValue,
                             Hashtable<String,Object> htblColNameValue ) throws DBAppException, IOException, ClassNotFoundException, ParseException {
          if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values!");
         Table table=(Table)deserializeObject("src/Resources/" + strTableName + ".ser");
         String primaryKeyName = table.getStrClusteringKeyColumn();
+        if(htblColNameValue.containsKey(primaryKeyName)){
+            throw new DBAppException("Cannot Update primary key");
+        }
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
         String row;
@@ -515,10 +531,10 @@ public class DBApp {
     public boolean isValid(String strTableName,Hashtable<String,Object> htblColNameValue) throws IOException, ParseException, ClassNotFoundException, DBAppException {
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
-        String row = br.readLine();
+        String row ="";
         String[] arr;
         boolean foundTableName = false;
-        while(row!=null){
+        while((row = br.readLine())!=null){
             arr = row.split(", ");
             if(arr[0].equals(strTableName)){
                 foundTableName = true;
@@ -534,47 +550,55 @@ public class DBApp {
                     throw new DBAppException("Primary key cannot be null");
                 }
                 if(object == null){
+                    System.out.println(colName);
                     htblColNameValue.put(colName,new NullWrapper());
                     continue;
                 }
-                if(colType.equals("java.lang.integer")){
+                else if(colType.equals("java.lang.integer")){
                     if(!(object instanceof java.lang.Integer)){
+                        System.out.print("integer case");
                         return false;
                     }
                     int minI = Integer.parseInt(min);
                     int maxI = Integer.parseInt(max);
                     if(((Integer)object)<minI || ((Integer)object)>maxI){
+                        System.out.print("maxMin prob");
                         return false;
                     }
                 }else if(colType.equals("java.lang.string")){
                     if(!(object instanceof java.lang.String)){
+                        System.out.println("string case");
                         return false;
                     }
                     if(((String)object).compareTo(min)<0 || ((String)object).compareTo(max)>0){
+                        System.out.println("maxMinString");
                         return false;
                     }
                 }else if(colType.equals("java.util.date")){
                     if(!(object instanceof java.util.Date)){
+                        System.out.println("date case");
                         return false;
                     }
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     Date minDate = formatter.parse(min);
                     Date maxDate = formatter.parse(max);
                     if(((Date)object).compareTo(minDate)<0 || ((Date)object).compareTo(maxDate)>0){
+                        System.out.println("min max date");
                         return false;
                     }
                 }else if(colType.equals("java.lang.double")){
                     if(!(object instanceof java.lang.Double)){
+                        System.out.println("double");
                         return false;
                     }
                     double minD = Double.parseDouble(min);
                     double maxD = Double.parseDouble(max);
                     if(((Double)object)<minD || ((Double)object)>maxD){
+                        System.out.println("min max double");
                         return false;
                     }
                 }
             }
-            row = br.readLine();
         }
         return foundTableName;
     }
