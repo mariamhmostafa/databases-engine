@@ -18,15 +18,18 @@ public class DBApp {
         Hashtable htblColNameType = new Hashtable();
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
-        htblColNameType.put("married", "boolean");
+        htblColNameType.put("gpa", "java.lang.Double");
+        htblColNameType.put("birthday", "java.lang.Date");
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "A");
         colMin.put("gpa", "0.0");
+        colMin.put("birthday", "java.lang.Date");
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "ZZZZZZZZZZZ");
         colMax.put("gpa","5.0");
+        colMax.put("birthday", "0000-00-00");
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
         //////inserting into table:
@@ -171,14 +174,15 @@ public class DBApp {
                 throw new DBAppException("Table name taken");
             }
         }
+        if(!validCreation(strClusteringKeyColumn, htblColNameType, htblColNameMin, htblColNameMax)){
+            throw new DBAppException("Inconsistant Columns");
+        }
         Table newTable = new Table(strTableName, strClusteringKeyColumn,htblColNameType,htblColNameMin,htblColNameMax);
         serializeObject(newTable, "src/Resources/" + strTableName + ".ser");
         FileWriter writer = new  FileWriter  ( "src/Resources/metadata.csv", true );
         for(String colName : htblColNameType.keySet()){
             StringBuilder sb = new StringBuilder();
             String type = htblColNameType.get(colName);
-            if(!(type.toLowerCase().equals("java.lang.integer") || type.toLowerCase().equals("java.lang.string") || type.toLowerCase().equals("java.lang.double") || type.toLowerCase().equals("java.lang.date")))
-                throw new DBAppException("Data type incorrect:(");
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
             boolean clusteringKey = colName==strClusteringKeyColumn;
@@ -194,6 +198,51 @@ public class DBApp {
         }
         writer.flush();
         writer.close();
+    }
+
+    public static boolean validCreation(String strClusteringKeyColumn, Hashtable<String,String> htblColNameType,
+                                        Hashtable<String,String> htblColNameMin, Hashtable<String,String> htblColNameMax ) {
+        if(htblColNameType.size() != htblColNameMin.size() || htblColNameType.size() != htblColNameMax.size())
+            return false;
+        if(!htblColNameType.containsKey(strClusteringKeyColumn))
+           return false;
+        for(String colName : htblColNameType.keySet()) {
+            if(!(htblColNameMin.containsKey(colName) && htblColNameMax.containsKey(colName)))
+                return false;
+            String type = htblColNameType.get(colName);
+            if(!(type.toLowerCase().equals("java.lang.integer") || type.toLowerCase().equals("java.lang.string") || type.toLowerCase().equals("java.lang.double") || type.toLowerCase().equals("java.lang.date")))
+                return false;
+            String min = htblColNameMin.get(colName);
+            String max = htblColNameMax.get(colName);
+            if(type.toLowerCase().equals("java.lang.integer")){
+                try{
+                    Integer.parseInt(min);
+                    Integer.parseInt(max);
+                } catch(NumberFormatException e) {
+                    return false;
+                } catch(NullPointerException e) {
+                    return false;
+                }
+            } else if(type.toLowerCase().equals("java.lang.double")){
+                try {
+                    Double.parseDouble(min);
+                    Double.parseDouble(max);
+                } catch(NumberFormatException e) {
+                    return false;
+                } catch(NullPointerException e) {
+                    return false;
+                }
+            } else if(type.toLowerCase().equals("java.lang.date")){
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    formatter.parse(min);
+                    formatter.parse(max);
+                }   catch(ParseException e){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void insertIntoTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException, IOException, ParseException, ClassNotFoundException {
