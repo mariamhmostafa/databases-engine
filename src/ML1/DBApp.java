@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DBApp {
-
     
     public void init() {
         FileWriter writer = null;
@@ -434,6 +433,7 @@ public class DBApp {
                     }
                     if (object == null) {
                         htblColNameValue.put(colName, new NullWrapper());
+                        counterInsert++;
                         continue;
                     } else if (colType.equals("java.lang.integer")) {
                         if (!(object instanceof java.lang.Integer)) {
