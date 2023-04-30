@@ -20,22 +20,6 @@ public class Page implements Serializable {
         return path;
     }
 
-    public Page (String tableName, int pageID){
-        String fileName = tableName + pageID + ".bin";
-        try {
-            File myObj = new File(fileName);
-            pageID++;
-            if (myObj.createNewFile()) {
-                System.out.println("File created: " + myObj.getName());
-            } else {
-                System.out.println("File already exists.");
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) {
         System.out.println(maxRows);
     }
