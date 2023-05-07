@@ -2,7 +2,7 @@ package ML1;
 
 import java.io.Serializable;
 
-public class NullWrapper implements Serializable {
+public class NullWrapper implements Serializable{
     public NullWrapper(){
     }
 
@@ -10,4 +10,5 @@ public class NullWrapper implements Serializable {
     public String toString() {
         return "null";
     }
+    
 }

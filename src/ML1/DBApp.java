@@ -10,6 +10,91 @@ import java.util.*;
 
 public class DBApp {
     
+    public static void main(String[] args) throws DBAppException {
+        DBApp dbApp = new DBApp();
+        dbApp.init();
+        
+        String strTableName = "student";
+        Hashtable htblColNameType = new Hashtable();
+        htblColNameType.put("id", "java.lang.Integer");
+        htblColNameType.put("name", "java.lang.String");
+        htblColNameType.put("gpa", "java.lang.Double");
+        Hashtable <String, String> colMin = new Hashtable<>();
+        colMin.put("id", "0");
+        colMin.put("name", "a");
+        colMin.put("gpa", "0.0");
+        Hashtable <String, String> colMax = new Hashtable<>();
+        colMax.put("id", "100");
+        colMax.put("name", "zzzzzzzzzzz");
+        colMax.put("gpa","5.0");
+        dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
+        
+        //////inserting into table:
+        Hashtable htblColNameValue1 = new Hashtable( );
+        htblColNameValue1.put("id", 19);
+//        htblColNameValue1.put("name", new String("mariam" ) );
+//        htblColNameValue1.put("gpa", new Double( 0.87) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue1 );
+        Hashtable htblColNameValue2 = new Hashtable( );
+        htblColNameValue2.put("id", new Integer( 20 ));
+        htblColNameValue2.put("name", new String("nairuzy" ) );
+        htblColNameValue2.put("gpa", new Double( 4.0) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue2 );
+        
+        Hashtable htblColNameValue4 = new Hashtable( );
+        htblColNameValue4.put("id", new Integer( 18));
+        htblColNameValue4.put("name", new String("marwa" ) );
+        htblColNameValue4.put("gpa", new Double( 3.0) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue4 );
+        Hashtable htblColNameValue5 = new Hashtable( );
+        htblColNameValue5.put("id", new Integer( 17));
+        htblColNameValue5.put("name", new String("sarah" ) );
+        htblColNameValue5.put("gpa", new Double( 3.0) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue5 );
+        Hashtable htblColNameValue6 = new Hashtable( );
+        htblColNameValue6.put("id", new Integer( 16));
+        htblColNameValue6.put("name", new String("sarah" ) );
+        htblColNameValue6.put("gpa", new Double( 2.6) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue6 );
+        Hashtable htblColNameValue3 = new Hashtable( );
+        htblColNameValue3.put("id", new Integer( 26));
+        htblColNameValue3.put("name", new String("frfr" ) );
+        htblColNameValue3.put("gpa", new Double( 2.6) );
+        dbApp.insertIntoTable( strTableName , htblColNameValue3 );
+    
+        SQLTerm[] arrSQLTerms;
+        arrSQLTerms = new SQLTerm[2];
+        arrSQLTerms[0] = new SQLTerm();
+        arrSQLTerms[1] = new SQLTerm();
+        arrSQLTerms[0]._strTableName = "Student";
+        arrSQLTerms[0]._strColumnName= "name";
+        arrSQLTerms[0]._strOperator = ">=";
+        arrSQLTerms[0]._objValue = null;
+        
+        arrSQLTerms[1]._strTableName = "Student";
+        arrSQLTerms[1]._strColumnName= "gpa";
+        arrSQLTerms[1]._strOperator = "=";
+        arrSQLTerms[1]._objValue = new Double( 2.6 );
+        String[]strarrOperators = new String[1];
+        strarrOperators[0] = "OR";
+    
+        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+        
+//        Hashtable toUpdate = new Hashtable();
+//        toUpdate.put("name", "mariam" );
+//        toUpdate.put("gpa", 0.7);
+//        dbApp.updateTable(strTableName,"19" ,toUpdate);
+    
+        while(resultSet.hasNext()) {
+            Tuple t = (Tuple) resultSet.next();
+            System.out.println();
+            for (String key : t.getValues().keySet()) {
+                System.out.println(key + " value: " + t.getValues().get(key).toString());
+            }
+        }
+        
+    }
+    
     public void init() {
         FileWriter writer = null;
         try {
@@ -25,7 +110,6 @@ public class DBApp {
 
     }
 
-
     public void createTable(String strTableName, String strClusteringKeyColumn, Hashtable<String,String> htblColNameType,
                             Hashtable<String,String> htblColNameMin, Hashtable<String,String> htblColNameMax ) throws DBAppException {
         BufferedReader br = null;
@@ -40,7 +124,7 @@ public class DBApp {
                 }
             }
             if(!validCreation(strClusteringKeyColumn, htblColNameType, htblColNameMin, htblColNameMax)){
-                throw new DBAppException("Inconsistant Columns");
+                throw new DBAppException("Inconsistent Columns");
             }
             Table newTable = new Table(strTableName, strClusteringKeyColumn,htblColNameType,htblColNameMin,htblColNameMax);
             serializeObject(newTable, "src/Resources/" + strTableName + ".ser");
@@ -559,10 +643,212 @@ public class DBApp {
         }
     }
     
+    
+    
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
             throws DBAppException{
-        return null;
+        validTerms(arrSQLTerms,strarrOperators);
+        ArrayList<HashSet<Tuple>> arrOfArr = new ArrayList<>();
+        for(SQLTerm sqlTerm : arrSQLTerms){
+            arrOfArr.add(getSelectedTuples(sqlTerm));
+        }
+        HashSet<Tuple> filtered = arrOfArr.get(0);
+        for(int i=0; i<strarrOperators.length; i++){
+            String operator = strarrOperators[i];
+            switch(operator.toLowerCase()){
+                case "or":
+                    filtered.addAll(arrOfArr.get(i+1));
+                    break;
+                case "and":
+                    for(Tuple t : arrOfArr.get(i+1)){
+                        if(!filtered.contains(t)){
+                            filtered.remove(t);
+                        }
+                    }
+                    break;
+                default:
+                    for(Tuple t : arrOfArr.get(i+1)){
+                        if(filtered.contains(t)) {
+                            filtered.remove(t);
+                        }else{
+                            filtered.add(t);
+                        }
+                    }
+            }
+        }
+        return filtered.iterator();
     }
+    
+    public HashSet<Tuple> getSelectedTuples(SQLTerm sqlTerm) throws DBAppException {
+        HashSet<Tuple> tuples = new HashSet<>();
+        Table table = (Table) deserializeObject("src/resources/" + sqlTerm._strTableName + ".ser");
+        if(table.getStrClusteringKeyColumn().equals(sqlTerm._strColumnName)){
+            //binary search
+        }else{
+            for(String path : table.getPaths()){
+                Page page = (Page) deserializeObject(path);
+                for(Tuple tuple : page.getTuplesInPage()){
+                    try {
+                        if (compareValues(sqlTerm, tuple)) {
+                            tuples.add(tuple);
+                        }
+                    }catch (Exception e){
+                        throw new DBAppException(e.getMessage());
+                    }
+                    
+                }
+                serializeObject(page, path);
+            }
+        }
+        return tuples;
+    }
+    
+    public boolean compareValues(SQLTerm sqlTerm, Tuple tuple){
+        Object value = tuple.getValues().get(sqlTerm._strColumnName);
+        Object objValue = sqlTerm._objValue;
+        switch(sqlTerm._strOperator){
+            case ">":
+                if(((Comparable)value).compareTo(objValue)>0){
+                    return true;
+                }
+                return false;
+            case ">=":
+                if(((Comparable)value).compareTo(objValue)>=0){
+                    return true;
+                }
+                return false;
+            case "<":
+                if(((Comparable)value).compareTo(objValue)<0){
+                    return true;
+                }
+                return false;
+            case "<=":
+                if(((Comparable)value).compareTo(objValue)<=0){
+                    return true;
+                }
+                return false;
+            case "!=":
+                if(value instanceof NullWrapper && objValue == null){
+                    return false;
+                }
+                if(value instanceof NullWrapper || objValue == null){
+                    return true;
+                }
+                if(((Comparable)value).compareTo(objValue)!=0){
+                    return true;
+                }
+                return false;
+            default:
+                if(value instanceof NullWrapper && objValue == null){
+                    return true;
+                }
+                if(value instanceof NullWrapper || objValue == null){
+                    return false;
+                }
+                if(((Comparable)value).compareTo(objValue)==0){
+                    return true;
+                }
+                return false;
+        }
+    }
+    
+    
+    public void validTerms(SQLTerm[] arrSQLTerms, String[] strarrOperators) throws DBAppException {
+        if(strarrOperators.length != arrSQLTerms.length-1){
+            throw new DBAppException("Size not consistent");
+        }
+        String tableName = arrSQLTerms[0]._strTableName.toLowerCase();
+        for(SQLTerm term : arrSQLTerms){
+            if(!term._strTableName.toLowerCase().equals(tableName)){
+                throw new DBAppException("table names not consistent");
+            }
+        }
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader("src/Resources/metadata.csv"));
+            String line;
+            boolean tableFound = false;
+            while((line = br.readLine())!=null){
+                String[] arr= line.split(", ");
+                if(arr[0].equals(tableName)) {
+                    tableFound = true;
+                }
+            }
+            if(!tableFound){
+                throw new DBAppException("table not found");
+            }
+        }  catch (IOException e) {
+            throw new DBAppException(e.getMessage());
+        }
+        
+        Table table = (Table) deserializeObject("src/resources/" + tableName + ".ser");
+        Hashtable<String, String> htblColNameType = table.getHtblColNameType();
+        Hashtable<String, String> htblColNameMin = table.getHtblColNameMin();
+        Hashtable<String, String> htblColNameMax = table.getHtblColNameMax();
+        for(SQLTerm term : arrSQLTerms){
+            if(!htblColNameType.containsKey(term._strColumnName.toLowerCase())){
+                throw new DBAppException("Column name not found");
+            }
+            if(!(term._strOperator.equals(">") || term._strOperator.equals(">=") || term._strOperator.equals("<") ||
+                    term._strOperator.equals("<=") || term._strOperator.equals("!=") || term._strOperator.equals("="))){
+                throw new DBAppException("Invalid Operator");
+            }
+            String colType=htblColNameType.get(term._strColumnName.toLowerCase());
+            Object object = term._objValue;
+            String min = htblColNameMin.get(term._strColumnName);
+            String max = htblColNameMax.get(term._strColumnName);
+            if (colType.equals("java.lang.integer")) {
+                if (!(object instanceof java.lang.Integer)) {
+                    throw new DBAppException("Type incorrect");
+                }
+                int minI = Integer.parseInt(min);
+                int maxI = Integer.parseInt(max);
+                if (((Integer) object) < minI || ((Integer) object) > maxI) {
+                    throw new DBAppException("Out of range");
+                }
+            } else if (colType.equals("java.lang.string")) {
+                if (!(object instanceof java.lang.String)) {
+                    throw new DBAppException("Type incorrect");
+                }
+                if (((String) object).compareTo(min) < 0 || ((String) object).compareTo(max) > 0) {
+                    throw new DBAppException("Out of range");
+                }
+            } else if (colType.equals("java.util.date")) {
+                if (!(object instanceof java.util.Date)) {
+                    throw new DBAppException("Type incorrect");
+                }
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                Date minDate = null;
+                try {
+                    minDate = formatter.parse(min);
+                    Date maxDate = formatter.parse(max);
+                    if (((Date) object).compareTo(minDate) < 0 || ((Date) object).compareTo(maxDate) > 0) {
+                        throw new DBAppException("Out of range");
+                    }
+                } catch (ParseException e) {
+                    throw new DBAppException(e.getMessage());
+                }
+            } else if (colType.equals("java.lang.double")) {
+                if (!(object instanceof java.lang.Double)) {
+                    throw new DBAppException("Type incorrect");
+                }
+                double minD = Double.parseDouble(min);
+                double maxD = Double.parseDouble(max);
+                if (((Double) object) < minD || ((Double) object) > maxD) {
+                    throw new DBAppException("Out of range");
+                }
+            }
+            for(String operator : strarrOperators){
+                if(!(operator.toLowerCase().equals("and") || operator.toLowerCase().equals("or") || operator.toLowerCase().equals("xor") )){
+                    throw new DBAppException("Invalid Operator");
+                }
+            }
+        }
+        
+        serializeObject(table , "src/resources/" + tableName + ".ser");
+        
+    }
+    
     
     protected Object deserializeObject(String path) throws DBAppException {
         try {
