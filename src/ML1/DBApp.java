@@ -682,23 +682,19 @@ public class DBApp {
     public HashSet<Tuple> getSelectedTuples(SQLTerm sqlTerm) throws DBAppException {
         HashSet<Tuple> tuples = new HashSet<>();
         Table table = (Table) deserializeObject("src/resources/" + sqlTerm._strTableName + ".ser");
-        if(table.getStrClusteringKeyColumn().equals(sqlTerm._strColumnName)){
-            //binary search
-        }else{
-            for(String path : table.getPaths()){
-                Page page = (Page) deserializeObject(path);
-                for(Tuple tuple : page.getTuplesInPage()){
-                    try {
-                        if (compareValues(sqlTerm, tuple)) {
-                            tuples.add(tuple);
-                        }
-                    }catch (Exception e){
-                        throw new DBAppException(e.getMessage());
+
+        for(String path : table.getPaths()){
+            Page page = (Page) deserializeObject(path);
+            for(Tuple tuple : page.getTuplesInPage()){
+                try {
+                    if (compareValues(sqlTerm, tuple)) {
+                        tuples.add(tuple);
                     }
-                    
+                }catch (Exception e){
+                    throw new DBAppException(e.getMessage());
                 }
-                serializeObject(page, path);
             }
+            serializeObject(page, path);
         }
         return tuples;
     }
