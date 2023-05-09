@@ -872,6 +872,53 @@ public class DBApp {
             throw new DBAppException(e);
         }
     }
+    private void isIndexValid(String strTableName, String[] strarrColName) throws DBAppException {
+        if(strarrColName.length != 3){
+            throw new DBAppException("not enough colunms");
+        }
+
+        try {
+            FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
+            BufferedReader br = new BufferedReader(oldMetaDataFile);
+            String row = "";
+            String[] arr;
+            boolean foundTableName = false;
+            strTableName = strTableName.toLowerCase();
+            while ((row = br.readLine()) != null) {
+                arr = row.split(", ");
+                if (arr[0].equals(strTableName))
+                    foundTableName = true;
+            }
+            if(!foundTableName)
+                throw new DBAppException("Table not found");
+        }catch(IOException e){
+            throw new DBAppException(e);
+        }
+        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+        for(String col: strarrColName){
+            if(!table.htblColNameType.containsKey(col.toLowerCase()))
+                throw new DBAppException("Column name not found");
+        }
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+    }
+    public void createIndex(String strTableName,
+                            String[] strarrColName) throws DBAppException{
+       isIndexValid(strTableName, strarrColName);
+
+    }
+
+    private void insertIntoIndex(String strTableName, String[] strarrColName) throws DBAppException {
+        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+        Comparable minx,miny,minz,maxx,maxy,maxz;
+        minx=table.getHtblColNameMin().get(strarrColName[0]);
+        maxx=table.getHtblColNameMin().get(strarrColName[0]);
+        miny=table.getHtblColNameMin().get(strarrColName[1]);
+        maxy=table.getHtblColNameMin().get(strarrColName[1]);
+        minz=table.getHtblColNameMin().get(strarrColName[2]);
+        maxz=table.getHtblColNameMin().get(strarrColName[2]);
+        Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
+
+    }
 }
 
 
