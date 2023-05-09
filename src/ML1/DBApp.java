@@ -906,12 +906,12 @@ public class DBApp {
        isIndexValid(strTableName, strarrColName);
         Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
         Comparable minx,miny,minz,maxx,maxy,maxz;
-        minx=table.getHtblColNameMin().get(strarrColName[0]);
-        maxx=table.getHtblColNameMin().get(strarrColName[0]);
-        miny=table.getHtblColNameMin().get(strarrColName[1]);
-        maxy=table.getHtblColNameMin().get(strarrColName[1]);
-        minz=table.getHtblColNameMin().get(strarrColName[2]);
-        maxz=table.getHtblColNameMin().get(strarrColName[2]);
+        minx=table.getHtblColNameMin().get(strarrColName[0].toLowerCase());
+        maxx=table.getHtblColNameMin().get(strarrColName[0]).toLowerCase();
+        miny=table.getHtblColNameMin().get(strarrColName[1].toLowerCase());
+        maxy=table.getHtblColNameMin().get(strarrColName[1].toLowerCase());
+        minz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
+        maxz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
         Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
