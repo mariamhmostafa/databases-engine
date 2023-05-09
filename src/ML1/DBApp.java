@@ -919,14 +919,17 @@ public class DBApp {
                 insertIntoIndex(strTableName, strarrColName, tuple);
             serializeObject(page, page.getPath());
         }
+        String oPath = "src/Resources/" + strTableName + table.getOctreePaths().size()+".ser";
+        String[] oInT = {strarrColName[0], strarrColName[1], strarrColName[2], table.getOctreePaths().size()+""};
+        table.getOctreePaths().add(oInT);
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
-
     }
 
     private void insertIntoIndex(String strTableName, String[] strarrColName, Tuple tuple) throws DBAppException {
 
     }
+
 }
 
 

@@ -13,12 +13,18 @@ public class Table implements Serializable {
     Vector<String> paths =new Vector<>();
     private int pageCounter=0;
 
+    private Vector<String[]> octrees = new Vector<>();
+
     public Table(String strTableName,String strClusteringKeyColumn, Hashtable<String,String> htblColNameType, Hashtable<String,String>htblColNameMin,Hashtable<String,String> htblColNameMax){
         this.strTableName = strTableName;
         this.strClusteringKeyColumn = strClusteringKeyColumn;
         this.htblColNameType = htblColNameType;
         this.htblColNameMin = htblColNameMin;
         this.htblColNameMax = htblColNameMax;
+    }
+
+    public Vector<String[]> getOctreePaths(){
+        return octrees;
     }
 
     public String getStrTableName() {

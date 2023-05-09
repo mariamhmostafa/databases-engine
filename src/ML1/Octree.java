@@ -34,4 +34,9 @@ public class Octree {
     public void setPoints(Vector<Point> points) {
         this.points = points;
     }
+
+    public boolean isLeaf(){
+        return bbs.isEmpty();
+    }
+
 }
