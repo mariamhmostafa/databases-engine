@@ -913,12 +913,18 @@ public class DBApp {
         minz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
         maxz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
         Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
+        for(String path: table.getPaths()){
+            Page page = (Page) deserializeObject(path);
+            for(Tuple tuple: page.getTuplesInPage())
+                insertIntoIndex(strTableName, strarrColName, tuple);
+            serializeObject(page, page.getPath());
+        }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
 
     }
 
-    private void insertIntoIndex(String strTableName, String[] strarrColName) throws DBAppException {
+    private void insertIntoIndex(String strTableName, String[] strarrColName, Tuple tuple) throws DBAppException {
 
     }
 }
