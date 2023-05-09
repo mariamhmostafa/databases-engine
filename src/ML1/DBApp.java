@@ -904,10 +904,6 @@ public class DBApp {
     public void createIndex(String strTableName,
                             String[] strarrColName) throws DBAppException{
        isIndexValid(strTableName, strarrColName);
-
-    }
-
-    private void insertIntoIndex(String strTableName, String[] strarrColName) throws DBAppException {
         Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
         Comparable minx,miny,minz,maxx,maxy,maxz;
         minx=table.getHtblColNameMin().get(strarrColName[0]);
@@ -917,6 +913,11 @@ public class DBApp {
         minz=table.getHtblColNameMin().get(strarrColName[2]);
         maxz=table.getHtblColNameMin().get(strarrColName[2]);
         Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
+
+
+    }
+
+    private void insertIntoIndex(String strTableName, String[] strarrColName) throws DBAppException {
 
     }
 }
