@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 
 public class Octree {
@@ -69,16 +66,6 @@ public class Octree {
         
     }
     
-    public static void main(String[] args) {
-        //date not wokring
-        Date date1 = new Date(2022, 1,1);
-        Date date2 = new Date(2022,1,30);
-        Date newDate = new Date(date1.getTime() +date2.getTime()/2);
-        System.out.println(date1);
-        System.out.println(date2);
-        System.out.println(newDate);
-    }
-    
     public static Comparable getMid(Comparable min, Comparable max){
         if(min instanceof Integer){
             return ((int)min + (int)max )/2;
@@ -90,14 +77,15 @@ public class Octree {
             return getMiddleString((String)min,(String) max);
         }
         //date not working
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTime((Date)min);
-        Calendar cal2 = Calendar.getInstance();
-        cal2.setTime((Date)max);
-        long diffInMillis = cal2.getTimeInMillis() - cal1.getTimeInMillis();
-        Calendar middleCal =  Calendar.getInstance();
-        middleCal.setTimeInMillis(cal1.getTimeInMillis() + diffInMillis / 2);
-        return middleCal.getTime();
+//        Calendar cal1 = Calendar.getInstance();
+//        cal1.setTime((Date)min);
+//        Calendar cal2 = Calendar.getInstance();
+//        cal2.setTime((Date)max);
+//        long diffInMillis = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+//        Calendar middleCal =  Calendar.getInstance();
+//        middleCal.setTimeInMillis(cal1.getTimeInMillis() + diffInMillis / 2);
+//        return middleCal.getTime();
+        return new Date((((Date)min).getTime() +((Date)max).getTime())/2);
         
     }
 
