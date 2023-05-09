@@ -926,6 +926,51 @@ public class DBApp {
         serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
     }
 
+
+
+    public void updateMetaFile(String tableName, String[] indexColumns) throws IOException {
+
+        FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
+        BufferedReader br = new BufferedReader(oldMetaDataFile);
+
+        StringBuilder newMetaData = new StringBuilder();
+        String curLine = "";
+
+        StringBuilder indexName=new StringBuilder();
+        for (String s:indexColumns){indexName.append(s);} //just creating the indexName by appending all colNames
+        while ((curLine = br.readLine()) != null) {
+            String[] curLineSplit = curLine.split(",");
+
+            if (!curLineSplit[0].equals(tableName)) {
+                newMetaData.append(curLine);
+                newMetaData.append("\n");
+                continue;
+            }
+            StringBuilder tmp = new StringBuilder(curLine);
+
+            for (String col : indexColumns) {
+                if (col.equals(curLineSplit[1])) {
+                    tmp = new StringBuilder();
+                    for (int i = 0; i < curLineSplit.length; i++)
+                        if(i==4){tmp.append(indexName+", ");}
+                        else if(i==5){tmp.append("Octree, ");}
+                        else if (i == 7)
+                            tmp.append(curLineSplit[i]);
+                        else
+                            tmp.append(curLineSplit[i] + ",");
+                }
+            }
+            newMetaData.append(tmp + "\n");
+        }
+
+        FileWriter metaDataFile = new FileWriter("src/resources/metadata.csv");
+        metaDataFile.write(newMetaData.toString());
+        metaDataFile.close();
+
+    }
+
+
+
     private void insertIntoIndex(String strTableName, String[] strarrColName, Tuple tuple) throws DBAppException {
 
     }
