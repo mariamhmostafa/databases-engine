@@ -913,7 +913,8 @@ public class DBApp {
         minz=table.getHtblColNameMin().get(strarrColName[2]);
         maxz=table.getHtblColNameMin().get(strarrColName[2]);
         Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
-
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
 
     }
 
