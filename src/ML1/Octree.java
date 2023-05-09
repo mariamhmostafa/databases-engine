@@ -2,8 +2,13 @@ package ML1;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
+
 
 public class Octree {
     private Vector<Octree> bbs = new Vector<>();
@@ -20,7 +25,6 @@ public class Octree {
     //   c c c c c c c c
     // 8  8  8  8 8 8 8 8
     // if points size < max insert
-
 
     public Octree(Comparable xmin, Comparable ymin, Comparable zmin, Comparable xmax, Comparable ymax, Comparable zmax){
         topLeftFront = new Point(xmin, ymin, zmin);
@@ -57,13 +61,47 @@ public class Octree {
             points.add(new Point(x,y,z, pageNum));
             return;
         }
+        
+        Comparable midx = getMid(topLeftFront.x, bottomRightBack.x);
+        Comparable midy = getMid(topLeftFront.y, bottomRightBack.y);
+        Comparable midz = getMid(topLeftFront.z, bottomRightBack.z);
+        
+        
     }
-
+    
     public static void main(String[] args) {
-        printMiddleString("abxy", "cd");
+        //date not wokring
+        Date date1 = new Date(2022, 1,1);
+        Date date2 = new Date(2022,1,30);
+        Date newDate = new Date(date1.getTime() +date2.getTime()/2);
+        System.out.println(date1);
+        System.out.println(date2);
+        System.out.println(newDate);
+    }
+    
+    public static Comparable getMid(Comparable min, Comparable max){
+        if(min instanceof Integer){
+            return ((int)min + (int)max )/2;
+        }
+        if(min instanceof Double){
+            return ((double)min + (double)max )/2;
+        }
+        if(min instanceof String){
+            return getMiddleString((String)min,(String) max);
+        }
+        //date not working
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime((Date)min);
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime((Date)max);
+        long diffInMillis = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+        Calendar middleCal =  Calendar.getInstance();
+        middleCal.setTimeInMillis(cal1.getTimeInMillis() + diffInMillis / 2);
+        return middleCal.getTime();
+        
     }
 
-    static void printMiddleString(String S, String T){
+    static String getMiddleString(String S, String T){
         int N = S.length();
         if(T.length()>S.length()){
             S += T.substring(S.length());
@@ -96,9 +134,11 @@ public class Octree {
             }
             a1[i] = (int)a1[i] / 2;
         }
+        String s ="";
         for (int i = 1; i <= N; i++) {
-            System.out.print((char)(a1[i] + 97));
+            s += (char)(a1[i] + 97);
         }
+        return s;
     }
 
     public static String getVal(String key) {
