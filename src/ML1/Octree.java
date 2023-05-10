@@ -14,6 +14,8 @@ public class Octree {
     private Point bottomRightBack;
     private static int maxEntries = Integer.parseInt(getVal("MaximumEntriesinOctreeNode"));
 
+    private boolean isLeaf = true;
+
     public Octree(){
 
     }
@@ -45,19 +47,24 @@ public class Octree {
 //    }
 
     public void insert(Comparable x, Comparable y, Comparable z, int pageNum) throws DBAppException {
-        if(x.compareTo(topLeftFront.x)<0  || x.compareTo(bottomRightBack.x)>0 ||
-                y.compareTo(topLeftFront.y)<0  || y.compareTo(bottomRightBack.y)>0 ||
-                z.compareTo(topLeftFront.z)<0  || z.compareTo(bottomRightBack.z)>0){
+        if(x.compareTo(topLeftFront.getX())<0  || x.compareTo(bottomRightBack.getX())>0 ||
+                y.compareTo(topLeftFront.getY())<0  || y.compareTo(bottomRightBack.getY())>0 ||
+                z.compareTo(topLeftFront.getZ())<0  || z.compareTo(bottomRightBack.getZ())>0){
             throw new DBAppException("Out of range");
         }
         if(points.size()<maxEntries){ //if size less than max entries then insert
             points.add(new Point(x,y,z, pageNum));
             return;
         }
+        for(Point p: points){
+            for(int pn: p.pageNums) {
+                insert(p.getX(), p.getY(), p.getZ(), pn);
+            }
+        }
         
-        Comparable midx = getMid(topLeftFront.x, bottomRightBack.x); //gets median of every dimension
-        Comparable midy = getMid(topLeftFront.y, bottomRightBack.y);
-        Comparable midz = getMid(topLeftFront.z, bottomRightBack.z);
+        Comparable midx = getMid(topLeftFront.getX(), bottomRightBack.getX()); //gets median of every dimension
+        Comparable midy = getMid(topLeftFront.getY(), bottomRightBack.getY());
+        Comparable midz = getMid(topLeftFront.getZ(), bottomRightBack.getZ());
         
         //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
         
@@ -76,68 +83,68 @@ public class Octree {
         Comparable[] newBounds = new Comparable[6];
         switch(pos){
             case 0:
-                newBounds[0] = topLeftFront.x;
-                newBounds[1] = topLeftFront.y;
-                newBounds[2] = topLeftFront.z;
+                newBounds[0] = topLeftFront.getX();
+                newBounds[1] = topLeftFront.getY();
+                newBounds[2] = topLeftFront.getZ();
                 newBounds[3] = midx;
                 newBounds[4] = midy;
                 newBounds[5] = midz;
                 break;
             case 1:
-                newBounds[0] = topLeftFront.x;
-                newBounds[1] = topLeftFront.y;
+                newBounds[0] = topLeftFront.getX();
+                newBounds[1] = topLeftFront.getY();
                 newBounds[2] = midz;
                 newBounds[3] = midx;
                 newBounds[4] = midy;
-                newBounds[5] = bottomRightBack.z;
+                newBounds[5] = bottomRightBack.getZ();
                 break;
             case 2:
-                newBounds[0] = topLeftFront.x;
+                newBounds[0] = topLeftFront.getX();
                 newBounds[1] = midy;
-                newBounds[2] = topLeftFront.z;
+                newBounds[2] = topLeftFront.getZ();
                 newBounds[3] = midx;
-                newBounds[4] = bottomRightBack.y;
+                newBounds[4] = bottomRightBack.getY();
                 newBounds[5] = midz;
                 break;
             case 3:
-                newBounds[0] = topLeftFront.x;
+                newBounds[0] = topLeftFront.getX();
                 newBounds[1] = midy;
                 newBounds[2] = midz;
                 newBounds[3] = midx;
-                newBounds[4] = bottomRightBack.y;
-                newBounds[5] = bottomRightBack.z;
+                newBounds[4] = bottomRightBack.getY();
+                newBounds[5] = bottomRightBack.getZ();
                 break;
             case 4:
                 newBounds[0] = midx;
-                newBounds[1] = topLeftFront.y;
-                newBounds[2] = topLeftFront.z;
-                newBounds[3] = bottomRightBack.x;
+                newBounds[1] = topLeftFront.getY();
+                newBounds[2] = topLeftFront.getZ();
+                newBounds[3] = bottomRightBack.getX();
                 newBounds[4] = midy;
                 newBounds[5] = midz;
                 break;
             case 5:
                 newBounds[0] = midx;
-                newBounds[1] = topLeftFront.y;
+                newBounds[1] = topLeftFront.getY();
                 newBounds[2] = midz;
-                newBounds[3] = bottomRightBack.x;
+                newBounds[3] = bottomRightBack.getX();
                 newBounds[4] = midy;
-                newBounds[5] = bottomRightBack.z;
+                newBounds[5] = bottomRightBack.getZ();
                 break;
             case 6:
                 newBounds[0] = midx;
                 newBounds[1] = midy;
-                newBounds[2] = topLeftFront.z;
-                newBounds[3] = bottomRightBack.x;
-                newBounds[4] = bottomRightBack.y;
+                newBounds[2] = topLeftFront.getZ();
+                newBounds[3] = bottomRightBack.getX();
+                newBounds[4] = bottomRightBack.getY();
                 newBounds[5] = midz;
                 break;
             default:
                 newBounds[0] = midx;
                 newBounds[1] = midy;
                 newBounds[2] = midz;
-                newBounds[3] = bottomRightBack.x;
-                newBounds[4] = bottomRightBack.y;
-                newBounds[5] = bottomRightBack.z;
+                newBounds[3] = bottomRightBack.getX();
+                newBounds[4] = bottomRightBack.getY();
+                newBounds[5] = bottomRightBack.getZ();
                 break;
         }
         return newBounds;
@@ -256,5 +263,7 @@ public class Octree {
         }catch(Exception e){System.out.println(e.getMessage());}
         return keyval;
     }
+
+
 
 }

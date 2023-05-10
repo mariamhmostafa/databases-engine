@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Point{
 
-Comparable x,y,z;
+private Comparable x,y,z;
 //max/min?
 //Tuple reference;
     ArrayList<Integer> pageNums;
@@ -26,6 +26,18 @@ Comparable x,y,z;
     
     public void insert(int pageNum){
         pageNums.add(pageNum);
+    }
+
+    public Comparable getX(){
+        return x;
+    }
+
+    public Comparable getY(){
+        return y;
+    }
+
+    public Comparable getZ(){
+        return z;
     }
 
 }
