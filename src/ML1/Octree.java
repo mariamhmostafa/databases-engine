@@ -8,7 +8,7 @@ import java.util.*;
 
 
 public class Octree {
-    private Vector<Octree> bbs = new Vector<>();
+    private Octree[] bbs = new Octree[8];
     private Vector<Point> points = new Vector<>();
     private Point topLeftFront;
     private Point bottomRightBack;
@@ -28,13 +28,9 @@ public class Octree {
         bottomRightBack = new Point(xmax, ymax, zmax);
     }
 
-    public Vector<Octree> getBbs() {
-        return bbs;
-    }
+    public Octree[] getBbs() { return bbs; }
 
-    public void setBbs(Vector<Octree> bbs) {
-        this.bbs = bbs;
-    }
+    public void setBbs(Octree[] bbs) { this.bbs = bbs; }
 
     public Vector<Point> getPoints() {
         return points;
@@ -44,9 +40,9 @@ public class Octree {
         this.points = points;
     }
 
-    public boolean isLeaf(){
-        return bbs.isEmpty();
-    }
+//    public boolean isLeaf(){
+//        return bbs.isEmpty();
+//    }
 
     public void insert(Comparable x, Comparable y, Comparable z, int pageNum) throws DBAppException {
         if(x.compareTo(topLeftFront.x)<0  || x.compareTo(bottomRightBack.x)>0 ||
@@ -54,16 +50,129 @@ public class Octree {
                 z.compareTo(topLeftFront.z)<0  || z.compareTo(bottomRightBack.z)>0){
             throw new DBAppException("Out of range");
         }
-        if(points.size()<maxEntries){
+        if(points.size()<maxEntries){ //if size less than max entries then insert
             points.add(new Point(x,y,z, pageNum));
             return;
         }
         
-        Comparable midx = getMid(topLeftFront.x, bottomRightBack.x);
+        Comparable midx = getMid(topLeftFront.x, bottomRightBack.x); //gets median of every dimension
         Comparable midy = getMid(topLeftFront.y, bottomRightBack.y);
         Comparable midz = getMid(topLeftFront.z, bottomRightBack.z);
         
+        //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
         
+        int pos = getPos(x, y, z, midx, midy, midz);
+        
+        if(bbs[pos]==null){ //bb not initialized so we should create a new octree in that poistion
+            Comparable[] newBounds = getNewBounds(midx, midy, midz, pos);
+            bbs[pos] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5]);
+        }
+        
+        bbs[pos].insert(x,y,z,pageNum);
+        
+    }
+    
+    public Comparable[] getNewBounds(Comparable midx, Comparable midy, Comparable midz, int pos){
+        Comparable[] newBounds = new Comparable[6];
+        switch(pos){
+            case 0:
+                newBounds[0] = topLeftFront.x;
+                newBounds[1] = topLeftFront.y;
+                newBounds[2] = topLeftFront.z;
+                newBounds[3] = midx;
+                newBounds[4] = midy;
+                newBounds[5] = midz;
+                break;
+            case 1:
+                newBounds[0] = topLeftFront.x;
+                newBounds[1] = topLeftFront.y;
+                newBounds[2] = midz;
+                newBounds[3] = midx;
+                newBounds[4] = midy;
+                newBounds[5] = bottomRightBack.z;
+                break;
+            case 2:
+                newBounds[0] = topLeftFront.x;
+                newBounds[1] = midy;
+                newBounds[2] = topLeftFront.z;
+                newBounds[3] = midx;
+                newBounds[4] = bottomRightBack.y;
+                newBounds[5] = midz;
+                break;
+            case 3:
+                newBounds[0] = topLeftFront.x;
+                newBounds[1] = midy;
+                newBounds[2] = midz;
+                newBounds[3] = midx;
+                newBounds[4] = bottomRightBack.y;
+                newBounds[5] = bottomRightBack.z;
+                break;
+            case 4:
+                newBounds[0] = midx;
+                newBounds[1] = topLeftFront.y;
+                newBounds[2] = topLeftFront.z;
+                newBounds[3] = bottomRightBack.x;
+                newBounds[4] = midy;
+                newBounds[5] = midz;
+                break;
+            case 5:
+                newBounds[0] = midx;
+                newBounds[1] = topLeftFront.y;
+                newBounds[2] = midz;
+                newBounds[3] = bottomRightBack.x;
+                newBounds[4] = midy;
+                newBounds[5] = bottomRightBack.z;
+                break;
+            case 6:
+                newBounds[0] = midx;
+                newBounds[1] = midy;
+                newBounds[2] = topLeftFront.z;
+                newBounds[3] = bottomRightBack.x;
+                newBounds[4] = bottomRightBack.y;
+                newBounds[5] = midz;
+                break;
+            default:
+                newBounds[0] = midx;
+                newBounds[1] = midy;
+                newBounds[2] = midz;
+                newBounds[3] = bottomRightBack.x;
+                newBounds[4] = bottomRightBack.y;
+                newBounds[5] = bottomRightBack.z;
+                break;
+        }
+        return newBounds;
+    }
+    
+    public static int getPos(Comparable x, Comparable y, Comparable z, Comparable midx, Comparable midy, Comparable midz){
+        if(x.compareTo(midx)<=0){
+            if(y.compareTo(midy)<=0){
+                if(z.compareTo(midz)<=0){
+                    return 0;
+                }else{
+                    return 1;
+                }
+            }else{
+                if(z.compareTo(midz)<=0){
+                    return 2;
+                }else{
+                    return 3;
+                }
+            }
+        }else{
+            if(y.compareTo(midy)<=0){
+                if(z.compareTo(midz)<=0){
+                    return 4;
+                }else{
+                    return 5;
+                }
+            }else{
+                if(z.compareTo(midz)<=0){
+                    return 6;
+                }else{
+                    return 7;
+                }
+            }
+        }
     }
     
     public static Comparable getMid(Comparable min, Comparable max){
@@ -76,7 +185,6 @@ public class Octree {
         if(min instanceof String){
             return getMiddleString((String)min,(String) max);
         }
-        //date not working
 //        Calendar cal1 = Calendar.getInstance();
 //        cal1.setTime((Date)min);
 //        Calendar cal2 = Calendar.getInstance();
