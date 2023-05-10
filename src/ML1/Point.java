@@ -16,7 +16,11 @@ private Comparable x,y,z;
         this.z = z;
     }
 
-    public Point(Comparable x, Comparable y, Comparable z,int pageNum){
+    public ArrayList<Integer> getPageNums() {
+        return pageNums;
+    }
+
+    public Point(Comparable x, Comparable y, Comparable z, int pageNum){
         pageNums = new ArrayList<>();
         this.x = x;
         this.y = y;
@@ -40,4 +44,9 @@ private Comparable x,y,z;
         return z;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return (this.x).equals(((Point)obj).x)&&(this.y).equals(((Point)obj).y) &&(this.z).equals(((Point)obj).z);
+
+    }
 }

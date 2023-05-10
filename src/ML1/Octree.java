@@ -52,8 +52,18 @@ public class Octree {
                 z.compareTo(topLeftFront.getZ())<0  || z.compareTo(bottomRightBack.getZ())>0){
             throw new DBAppException("Out of range");
         }
-        if(points.size()<maxEntries){ //if size less than max entries then insert
-            points.add(new Point(x,y,z, pageNum));
+        if(isLeaf && points.size()<maxEntries){
+            //if size less than max entries then insert
+            Point newpoint=new Point(x,y,z, pageNum);
+            for (Point p:points){
+                if(newpoint.equals(p)){
+                    p.getPageNums().add(pageNum);
+                    return;
+                }
+
+            }
+
+            points.add(newpoint);
             return;
         }
         for(Point p: points){
@@ -72,6 +82,7 @@ public class Octree {
         
         if(bbs[pos]==null){ //bb not initialized so we should create a new octree in that poistion
             Comparable[] newBounds = getNewBounds(midx, midy, midz, pos);
+            isLeaf=false;
             bbs[pos] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5]);
         }
         
