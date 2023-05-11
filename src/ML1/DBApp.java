@@ -952,6 +952,11 @@ public class DBApp {
             if(!table.htblColNameType.containsKey(col.toLowerCase()))
                 throw new DBAppException("Column name not found");
         }
+        for(String col:strarrColName){
+            if(table.getOctreePaths().contains(col)){
+                throw new DBAppException("Column already has an index");
+            }
+        }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
     public void createIndex(String strTableName,
