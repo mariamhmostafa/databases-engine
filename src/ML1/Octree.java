@@ -48,7 +48,6 @@ public class Octree implements Serializable {
 //    }
 
     public void insert(Comparable x, Comparable y, Comparable z, String path) throws DBAppException {
-        System.out.println("Inserting: "+x+" "+y+" "+z);
         if(isLeaf && points.size()<maxEntries){
             //if size less than max entries then insert
             Point newpoint=new Point(x,y,z, path);

@@ -63,8 +63,8 @@ public class DBApp {
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
-        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"Octree.ser");
-        printOctree(octree);
+//        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+1+"Octree.ser");
+//        printOctree(octree);
 //        SQLTerm[] arrSQLTerms;
 //        arrSQLTerms = new SQLTerm[2];
 //        arrSQLTerms[0] = new SQLTerm();
@@ -942,11 +942,11 @@ public class DBApp {
             }
             serializeObject(page, page.getPath());
         }
-        String oPath = "src/Resources/" + strTableName + table.getOctreePaths().size()+".ser";
-        String[] oInT = {strarrColName[0], strarrColName[1], strarrColName[2], table.getOctreePaths().size()+""};
-        table.getOctreePaths().add(oInT);
+        String oPath = "src/Resources/" + strTableName + table.getOctreePaths().size()+"Octree.ser";
+        for(int i=0; i<strarrColName.length; i++)
+            table.getOctreePaths().put(strarrColName[i], oPath);
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
-        serializeObject(octree,"src/Resources/"+ strTableName+"Octree.ser");
+        serializeObject(octree,oPath);
     }
 
 
