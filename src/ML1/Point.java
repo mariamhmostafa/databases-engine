@@ -1,14 +1,15 @@
 package ML1;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class Point{
+public class Point implements Serializable {
 
 private Comparable x,y,z;
 //max/min?
 //Tuple reference;
-    ArrayList<Integer> pageNums;
+    ArrayList<String> pagePath;
 
     public Point(Comparable x, Comparable y, Comparable z){
         this.x = x;
@@ -16,20 +17,20 @@ private Comparable x,y,z;
         this.z = z;
     }
 
-    public ArrayList<Integer> getPageNums() {
-        return pageNums;
+    public ArrayList<String> getPagePath() {
+        return pagePath;
     }
 
-    public Point(Comparable x, Comparable y, Comparable z, int pageNum){
-        pageNums = new ArrayList<>();
+    public Point(Comparable x, Comparable y, Comparable z, String path){
+        pagePath = new ArrayList<>();
         this.x = x;
         this.y = y;
         this.z = z;
-        insert(pageNum);
+        insert(path);
     }
     
-    public void insert(int pageNum){
-        pageNums.add(pageNum);
+    public void insert(String path){
+        pagePath.add(path);
     }
 
     public Comparable getX(){

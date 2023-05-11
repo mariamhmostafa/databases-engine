@@ -2,12 +2,13 @@ package ML1;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 
-public class Octree {
+public class Octree implements Serializable {
     private Octree[] bbs = new Octree[8];
     private Vector<Point> points = new Vector<>();
     private Point topLeftFront;
@@ -46,18 +47,14 @@ public class Octree {
 //        return bbs.isEmpty();
 //    }
 
-    public void insert(Comparable x, Comparable y, Comparable z, int pageNum) throws DBAppException {
-        if(x.compareTo(topLeftFront.getX())<0  || x.compareTo(bottomRightBack.getX())>0 ||
-                y.compareTo(topLeftFront.getY())<0  || y.compareTo(bottomRightBack.getY())>0 ||
-                z.compareTo(topLeftFront.getZ())<0  || z.compareTo(bottomRightBack.getZ())>0){
-            throw new DBAppException("Out of range");
-        }
+    public void insert(Comparable x, Comparable y, Comparable z, String path) throws DBAppException {
+        System.out.println("Inserting: "+x+" "+y+" "+z);
         if(isLeaf && points.size()<maxEntries){
             //if size less than max entries then insert
-            Point newpoint=new Point(x,y,z, pageNum);
+            Point newpoint=new Point(x,y,z, path);
             for (Point p:points){
                 if(newpoint.equals(p)){
-                    p.getPageNums().add(pageNum);
+                    p.getPagePath().add(path);
                     return;
                 }
 
@@ -66,28 +63,31 @@ public class Octree {
             points.add(newpoint);
             return;
         }
-        for(Point p: points){
-            for(int pn: p.pageNums) {
-                insert(p.getX(), p.getY(), p.getZ(), pn);
+        else {
+
+            Comparable midx = getMid(topLeftFront.getX(), bottomRightBack.getX()); //gets median of every dimension
+            Comparable midy = getMid(topLeftFront.getY(), bottomRightBack.getY());
+            Comparable midz = getMid(topLeftFront.getZ(), bottomRightBack.getZ());
+
+            //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
+            int pos = getPos(x, y, z, midx, midy, midz);
+            if (!isLeaf)
+                bbs[pos].insert(x, y, z, path);
+            else {
+                isLeaf = false;
+                for(int i=0; i< bbs.length; i++){
+                    Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
+                    bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5]);
+                }
+                for (Point p : points) {
+                    int rePos = getPos(p.getX(), p.getY(), p.getZ(), midx, midy, midz);
+                    for (String pn : p.getPagePath()) {
+                        bbs[rePos].insert(p.getX(), p.getY(), p.getZ(), pn);
+                    }
+                }
+                bbs[pos].insert(x, y, z, path);
             }
         }
-        
-        Comparable midx = getMid(topLeftFront.getX(), bottomRightBack.getX()); //gets median of every dimension
-        Comparable midy = getMid(topLeftFront.getY(), bottomRightBack.getY());
-        Comparable midz = getMid(topLeftFront.getZ(), bottomRightBack.getZ());
-        
-        //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
-        
-        int pos = getPos(x, y, z, midx, midy, midz);
-        
-        if(bbs[pos]==null){ //bb not initialized so we should create a new octree in that poistion
-            Comparable[] newBounds = getNewBounds(midx, midy, midz, pos);
-            isLeaf=false;
-            bbs[pos] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5]);
-        }
-        
-        bbs[pos].insert(x,y,z,pageNum);
-        
     }
     
     public Comparable[] getNewBounds(Comparable midx, Comparable midy, Comparable midz, int pos){
@@ -162,29 +162,29 @@ public class Octree {
     }
     
     public static int getPos(Comparable x, Comparable y, Comparable z, Comparable midx, Comparable midy, Comparable midz){
-        if(x.compareTo(midx)<=0){
-            if(y.compareTo(midy)<=0){
-                if(z.compareTo(midz)<=0){
+        if(compareTo(x, midx)<=0){
+            if(compareTo(y, midy)<=0){
+                if(compareTo(z, midz)<=0){
                     return 0;
                 }else{
                     return 1;
                 }
             }else{
-                if(z.compareTo(midz)<=0){
+                if(compareTo(z, midz)<=0){
                     return 2;
                 }else{
                     return 3;
                 }
             }
         }else{
-            if(y.compareTo(midy)<=0){
-                if(z.compareTo(midz)<=0){
+            if(compareTo(y, midy)<=0){
+                if(compareTo(z, midz)<=0){
                     return 4;
                 }else{
                     return 5;
                 }
             }else{
-                if(z.compareTo(midz)<=0){
+                if(compareTo(z, midz)<=0){
                     return 6;
                 }else{
                     return 7;
@@ -275,6 +275,20 @@ public class Octree {
         return keyval;
     }
 
+    public static int compareTo(Comparable x, Comparable y){
+        if( x instanceof java.lang.String)
+            return ((String) x).compareTo((String) y);
+        else if( x instanceof java.lang.Double)
+            return ((Double) x).compareTo((Double) y);
+        else if( x instanceof java.lang.Integer)
+            return ((Integer) x).compareTo((Integer) y);
+        else
+            return ((Date) x).compareTo((Date) y);
+    }
+
+    public boolean isLeaf(){
+        return isLeaf;
+    }
 
 
 }

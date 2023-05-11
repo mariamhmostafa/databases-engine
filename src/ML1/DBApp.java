@@ -32,8 +32,8 @@ public class DBApp {
         //////inserting into table:
         Hashtable htblColNameValue1 = new Hashtable( );
         htblColNameValue1.put("id", 19);
-//        htblColNameValue1.put("name", new String("mariam" ) );
-//        htblColNameValue1.put("gpa", new Double( 0.87) );
+        htblColNameValue1.put("name", new String("mariam" ) );
+        htblColNameValue1.put("gpa", new Double( 0.87) );
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
         Hashtable htblColNameValue2 = new Hashtable( );
         htblColNameValue2.put("id", new Integer( 20 ));
@@ -61,40 +61,59 @@ public class DBApp {
         htblColNameValue3.put("name", new String("frfr" ) );
         htblColNameValue3.put("gpa", new Double( 2.6) );
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
-    
-        SQLTerm[] arrSQLTerms;
-        arrSQLTerms = new SQLTerm[2];
-        arrSQLTerms[0] = new SQLTerm();
-        arrSQLTerms[1] = new SQLTerm();
-        arrSQLTerms[0]._strTableName = "Student";
-        arrSQLTerms[0]._strColumnName= "name";
-        arrSQLTerms[0]._strOperator = ">=";
-        arrSQLTerms[0]._objValue = null;
-        
-        arrSQLTerms[1]._strTableName = "Student";
-        arrSQLTerms[1]._strColumnName= "gpa";
-        arrSQLTerms[1]._strOperator = "=";
-        arrSQLTerms[1]._objValue = new Double( 2.6 );
-        String[]strarrOperators = new String[1];
-        strarrOperators[0] = "OR";
-    
-        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+        String[] strarrColName = {"gpa", "name", "id"};
+        dbApp.createIndex("student", strarrColName);
+        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"Octree.ser");
+        printOctree(octree);
+//        SQLTerm[] arrSQLTerms;
+//        arrSQLTerms = new SQLTerm[2];
+//        arrSQLTerms[0] = new SQLTerm();
+//        arrSQLTerms[1] = new SQLTerm();
+//        arrSQLTerms[0]._strTableName = "Student";
+//        arrSQLTerms[0]._strColumnName= "name";
+//        arrSQLTerms[0]._strOperator = ">=";
+//        arrSQLTerms[0]._objValue = null;
+//
+//        arrSQLTerms[1]._strTableName = "Student";
+//        arrSQLTerms[1]._strColumnName= "gpa";
+//        arrSQLTerms[1]._strOperator = "=";
+//        arrSQLTerms[1]._objValue = new Double( 2.6 );
+//        String[]strarrOperators = new String[1];
+//        strarrOperators[0] = "OR";
+//
+//        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
         
 //        Hashtable toUpdate = new Hashtable();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
     
-        while(resultSet.hasNext()) {
-            Tuple t = (Tuple) resultSet.next();
-            System.out.println();
-            for (String key : t.getValues().keySet()) {
-                System.out.println(key + " value: " + t.getValues().get(key).toString());
-            }
-        }
+//        while(resultSet.hasNext()) {
+//            Tuple t = (Tuple) resultSet.next();
+//            System.out.println();
+//            for (String key : t.getValues().keySet()) {
+//                System.out.println(key + " value: " + t.getValues().get(key).toString());
+//            }
+//        }
         
     }
-    
+
+
+    private static void printOctree(Octree octree){
+        if(octree.isLeaf()) {
+            for (Point p : octree.getPoints()) {
+                System.out.print("x:" + p.getX() + " y:" + p.getY() + " z:" + p.getZ());
+                for (String page : p.getPagePath()) {
+                    System.out.print(" page:" + page);
+                }
+                System.out.println();
+            }
+        } else{
+            for(Octree bb: octree.getBbs()){
+                printOctree(bb);
+            }
+        }
+    }
     public void init() {
         FileWriter writer = null;
         try {
@@ -906,17 +925,21 @@ public class DBApp {
        isIndexValid(strTableName, strarrColName);
         Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
         Comparable minx,miny,minz,maxx,maxy,maxz;
-        minx=table.getHtblColNameMin().get(strarrColName[0].toLowerCase());
-        maxx=table.getHtblColNameMin().get(strarrColName[0]).toLowerCase();
-        miny=table.getHtblColNameMin().get(strarrColName[1].toLowerCase());
-        maxy=table.getHtblColNameMin().get(strarrColName[1].toLowerCase());
-        minz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
-        maxz=table.getHtblColNameMin().get(strarrColName[2].toLowerCase());
+        minx = set(table.getHtblColNameType().get(strarrColName[0].toLowerCase()), table.getHtblColNameMin().get(strarrColName[0].toLowerCase()));
+        maxx = set(table.getHtblColNameType().get(strarrColName[0].toLowerCase()), table.getHtblColNameMax().get(strarrColName[0].toLowerCase()));
+        miny = set(table.getHtblColNameType().get(strarrColName[1].toLowerCase()), table.getHtblColNameMin().get(strarrColName[1].toLowerCase()));
+        maxy = set(table.getHtblColNameType().get(strarrColName[1].toLowerCase()), table.getHtblColNameMax().get(strarrColName[1].toLowerCase()));
+        minz = set(table.getHtblColNameType().get(strarrColName[2].toLowerCase()), table.getHtblColNameMin().get(strarrColName[2].toLowerCase()));
+        maxz = set(table.getHtblColNameType().get(strarrColName[2].toLowerCase()), table.getHtblColNameMax().get(strarrColName[2].toLowerCase()));
         Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
         for(String path: table.getPaths()){
             Page page = (Page) deserializeObject(path);
-            for(Tuple tuple: page.getTuplesInPage())
-                insertIntoIndex(strTableName, strarrColName, tuple);
+            for(Tuple tuple: page.getTuplesInPage()) {
+                Comparable x  = (Comparable) tuple.getValues().get(strarrColName[0]);
+                Comparable y  = (Comparable) tuple.getValues().get(strarrColName[1]);
+                Comparable z  = (Comparable) tuple.getValues().get(strarrColName[2]);
+                octree.insert(x,y,z, page.getPath());
+            }
             serializeObject(page, page.getPath());
         }
         String oPath = "src/Resources/" + strTableName + table.getOctreePaths().size()+".ser";
@@ -971,8 +994,19 @@ public class DBApp {
 
 
 
-    private void insertIntoIndex(String strTableName, String[] strarrColName, Tuple tuple) throws DBAppException {
-
+    private Comparable set(String type, String value) throws DBAppException {
+        if (type.toLowerCase().equals("java.lang.integer"))
+            return Integer.parseInt(value);
+        else if (type.toLowerCase().equals("java.util.date")) {
+            try {
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                return formatter.parse(value);
+            } catch (ParseException e) {
+                throw new DBAppException(e);
+            }
+        } else if (type.toLowerCase().equals("java.lang.double"))
+            return Double.parseDouble(value);
+        return value;
     }
 
 }
