@@ -249,7 +249,8 @@ public class DBApp {
                 value = (Comparable) lasttuple.getValues().get(primaryKey);
                 deleteFromTable(strTableName, lasttuple.getValues());
                 if (pathi == table.getPaths().size() - 1) {
-                    createPage(table, lasttuple);
+                    String pathOfPage=createPage(table, lasttuple);
+                    insertIntoIndex(table,htblColNameValue,pathOfPage);
                     serializeObject(table, "src/Resources/" + strTableName + ".ser");
                     return;
                 }
@@ -257,6 +258,7 @@ public class DBApp {
                 page = (Page) deserializeObject(pathName);
                 i = getNewIndex(page.getTuplesInPage(), value);
                 page.getTuplesInPage().add(i, newtuple);
+                insertIntoIndex(table,htblColNameValue,pathName);
             }
             serializeObject(page, page.getPath());
             serializeObject(table, "src/Resources/" + strTableName + ".ser");
@@ -264,7 +266,24 @@ public class DBApp {
 //     why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
 
-    public void createPage(Table table, Tuple newtuple) throws DBAppException{
+    public void insertIntoIndex(Table table,Hashtable<String,Object> htblColNameValue,String path) throws DBAppException {
+        HashSet<String> hs=new HashSet<>();
+
+        for (String key:htblColNameValue.keySet()){
+           String octreePath=table.getOctreePaths().get(key);
+            if (octreePath!=null){
+                if(!hs.contains(octreePath)){
+                    hs.add(octreePath);
+                    Octree tree=(Octree) deserializeObject(octreePath);
+                    tree.insert((Comparable) htblColNameValue.get(tree.getColumns()[0]),(Comparable) htblColNameValue.get(tree.getColumns()[1]),(Comparable)htblColNameValue.get(tree.getColumns()[2]),path);
+                    serializeObject(tree,octreePath);
+            }}
+        }
+
+    }
+
+
+    public String createPage(Table table, Tuple newtuple) throws DBAppException{
         Page page = new Page("src/Resources/"+table.getStrTableName()+table.getPageCounter()+".ser");
         table.setPageCounter(table.getPageCounter()+1);
         page.setMinValInPage(newtuple.getPrimaryKey());
@@ -272,7 +291,7 @@ public class DBApp {
         page.getTuplesInPage().add(newtuple);
         table.getPaths().add(page.getPath());
         serializeObject(page, page.getPath());
-
+        return page.getPath();
     }
     
     public int getPageIndex(Table table, Tuple tuple) throws DBAppException {
@@ -931,7 +950,7 @@ public class DBApp {
         maxy = set(table.getHtblColNameType().get(strarrColName[1].toLowerCase()), table.getHtblColNameMax().get(strarrColName[1].toLowerCase()));
         minz = set(table.getHtblColNameType().get(strarrColName[2].toLowerCase()), table.getHtblColNameMin().get(strarrColName[2].toLowerCase()));
         maxz = set(table.getHtblColNameType().get(strarrColName[2].toLowerCase()), table.getHtblColNameMax().get(strarrColName[2].toLowerCase()));
-        Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz);
+        Octree octree=new Octree(minx,miny,minz,maxx,maxy,maxz,strarrColName[0].toLowerCase(),strarrColName[1].toLowerCase(),strarrColName[2].toLowerCase());
         for(String path: table.getPaths()){
             Page page = (Page) deserializeObject(path);
             for(Tuple tuple: page.getTuplesInPage()) {

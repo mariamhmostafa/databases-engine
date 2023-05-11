@@ -9,6 +9,7 @@ import java.util.*;
 
 
 public class Octree implements Serializable {
+    private static String[] columns =new String[3];
     private Octree[] bbs = new Octree[8];
     private Vector<Point> points = new Vector<>();
     private Point topLeftFront;
@@ -26,9 +27,12 @@ public class Octree implements Serializable {
     // 8  8  8  8 8 8 8 8
     // if points size < max insert
 
-    public Octree(Comparable xmin, Comparable ymin, Comparable zmin, Comparable xmax, Comparable ymax, Comparable zmax){
+    public Octree(Comparable xmin, Comparable ymin, Comparable zmin, Comparable xmax, Comparable ymax, Comparable zmax,String x,String y,String z){
         topLeftFront = new Point(xmin, ymin, zmin);
         bottomRightBack = new Point(xmax, ymax, zmax);
+        columns[0]=x;
+        columns[1]=y;
+        columns[2]=z;
     }
 
     public Octree[] getBbs() { return bbs; }
@@ -76,7 +80,7 @@ public class Octree implements Serializable {
                 isLeaf = false;
                 for(int i=0; i< bbs.length; i++){
                     Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
-                    bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5]);
+                    bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5],this.getColumns()[0],this.getColumns()[1],this.getColumns()[2]);
                 }
                 for (Point p : points) {
                     int rePos = getPos(p.getX(), p.getY(), p.getZ(), midx, midy, midz);
@@ -289,5 +293,7 @@ public class Octree implements Serializable {
         return isLeaf;
     }
 
-
+    public String[] getColumns() {
+        return columns;
+    }
 }
