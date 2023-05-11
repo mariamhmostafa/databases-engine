@@ -51,13 +51,13 @@ public class Octree implements Serializable {
 //        return bbs.isEmpty();
 //    }
 
-    public void insert(Comparable x, Comparable y, Comparable z, String path) throws DBAppException {
+    public void insert(Comparable x, Comparable y, Comparable z, String path, Object clustringkey) throws DBAppException {
         if(isLeaf && points.size()<maxEntries){
             //if size less than max entries then insert
-            Point newpoint=new Point(x,y,z, path);
+            Point newpoint=new Point(x,y,z, path,clustringkey);
             for (Point p:points){
                 if(newpoint.equals(p)){
-                    p.getPagePath().add(path);
+                    p.getReference().put(clustringkey,path);
                     return;
                 }
 
@@ -75,7 +75,7 @@ public class Octree implements Serializable {
             //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
             int pos = getPos(x, y, z, midx, midy, midz);
             if (!isLeaf)
-                bbs[pos].insert(x, y, z, path);
+                bbs[pos].insert(x, y, z, path, clustringkey);
             else {
                 isLeaf = false;
                 for(int i=0; i< bbs.length; i++){
@@ -84,11 +84,11 @@ public class Octree implements Serializable {
                 }
                 for (Point p : points) {
                     int rePos = getPos(p.getX(), p.getY(), p.getZ(), midx, midy, midz);
-                    for (String pn : p.getPagePath()) {
-                        bbs[rePos].insert(p.getX(), p.getY(), p.getZ(), pn);
+                    for (Object primarykey :p.getReference().keySet() ) {
+                        bbs[rePos].insert(p.getX(), p.getY(), p.getZ(),p.getReference().get(primarykey) ,primarykey);
                     }
                 }
-                bbs[pos].insert(x, y, z, path);
+                bbs[pos].insert(x, y, z, path,clustringkey);
             }
         }
     }
@@ -295,5 +295,22 @@ public class Octree implements Serializable {
 
     public String[] getColumns() {
         return columns;
+    }
+
+    public void updatePath(Comparable x,Comparable y,Comparable z,Object clustringkey,String path){
+        Point point=new Point(x,y,z);
+        if(isLeaf){
+            for(Point p:points){
+                if(p.equals(point)){
+                    p.getReference().put(clustringkey,path);
+                }
+            }
+        }
+        else{
+            for(int i=0;i< bbs.length;i++){
+                bbs[i].updatePath(x,y,z,clustringkey,path);
+            }
+        }
+
     }
 }

@@ -3,13 +3,14 @@ package ML1;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Point implements Serializable {
 
 private Comparable x,y,z;
 //max/min?
 //Tuple reference;
-    ArrayList<String> pagePath;
+    Hashtable<Object,String> reference= new Hashtable<>();
 
     public Point(Comparable x, Comparable y, Comparable z){
         this.x = x;
@@ -17,21 +18,21 @@ private Comparable x,y,z;
         this.z = z;
     }
 
-    public ArrayList<String> getPagePath() {
-        return pagePath;
+    public Hashtable<Object,String> getReference() {
+        return reference;
     }
 
-    public Point(Comparable x, Comparable y, Comparable z, String path){
-        pagePath = new ArrayList<>();
+    public Point(Comparable x, Comparable y, Comparable z, String path, Object clusteringKey){
         this.x = x;
         this.y = y;
         this.z = z;
-        insert(path);
+        this.reference.put(clusteringKey,path);
     }
     
-    public void insert(String path){
-        pagePath.add(path);
-    }
+//    public void insert(String path) {
+//        pagePath.add(path);
+//    }
+
 
     public Comparable getX(){
         return x;

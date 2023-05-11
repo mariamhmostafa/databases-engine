@@ -99,21 +99,21 @@ public class DBApp {
     }
 
 
-    private static void printOctree(Octree octree){
-        if(octree.isLeaf()) {
-            for (Point p : octree.getPoints()) {
-                System.out.print("x:" + p.getX() + " y:" + p.getY() + " z:" + p.getZ());
-                for (String page : p.getPagePath()) {
-                    System.out.print(" page:" + page);
-                }
-                System.out.println();
-            }
-        } else{
-            for(Octree bb: octree.getBbs()){
-                printOctree(bb);
-            }
-        }
-    }
+//    private static void printOctree(Octree octree){
+//        if(octree.isLeaf()) {
+//            for (Point p : octree.getPoints()) {
+//                System.out.print("x:" + p.getX() + " y:" + p.getY() + " z:" + p.getZ());
+//                for (String page : p.getPagePath()) {
+//                    System.out.print(" page:" + page);
+//                }
+//                System.out.println();
+//            }
+//        } else{
+//            for(Octree bb: octree.getBbs()){
+//                printOctree(bb);
+//            }
+//        }
+//    }
     public void init() {
         FileWriter writer = null;
         try {
@@ -230,7 +230,8 @@ public class DBApp {
 
             Tuple newtuple = new Tuple(htblColNameValue, value);
             if (table.getPaths().isEmpty()) {
-                createPage(table, newtuple);
+                String Path=createPage(table, newtuple);
+                insertIntoIndex(table,htblColNameValue,Path,newtuple.getPrimaryKey());
                 serializeObject(table, "src/Resources/" + strTableName + ".ser");
                 return;
             }
@@ -239,6 +240,7 @@ public class DBApp {
             Page page = (Page) deserializeObject(pathName);
             int i = getNewIndex(page.getTuplesInPage(), value);
             page.getTuplesInPage().add(i, newtuple);
+            insertIntoIndex(table,htblColNameValue,pathName,newtuple.getPrimaryKey());
             if (page.getTuplesInPage().size() <= Integer.parseInt(Page.getVal("MaximumRowsCountinTablePage"))) {
                 page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
                 page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
@@ -250,23 +252,36 @@ public class DBApp {
                 deleteFromTable(strTableName, lasttuple.getValues());
                 if (pathi == table.getPaths().size() - 1) {
                     String pathOfPage=createPage(table, lasttuple);
-                    insertIntoIndex(table,htblColNameValue,pathOfPage);
+                    insertIntoIndex(table,htblColNameValue,pathOfPage,lasttuple.getPrimaryKey());
                     serializeObject(table, "src/Resources/" + strTableName + ".ser");
                     return;
                 }
                 pathName = table.getPaths().get(++pathi);
                 page = (Page) deserializeObject(pathName);
                 i = getNewIndex(page.getTuplesInPage(), value);
-                page.getTuplesInPage().add(i, newtuple);
-                insertIntoIndex(table,htblColNameValue,pathName);
+                page.getTuplesInPage().add(i, lasttuple);
+                insertIntoIndex(table,htblColNameValue,pathName,lasttuple.getPrimaryKey());
             }
             serializeObject(page, page.getPath());
             serializeObject(table, "src/Resources/" + strTableName + ".ser");
 
 //     why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
+    public void updateIndex(Table table,Tuple t,String path) throws DBAppException {
+        HashSet<String> hs=new HashSet<>();
 
-    public void insertIntoIndex(Table table,Hashtable<String,Object> htblColNameValue,String path) throws DBAppException {
+        for (String key:t.getValues().keySet()){
+            String octreePath=table.getOctreePaths().get(key);
+            if (octreePath!=null){
+                if(!hs.contains(octreePath)){
+                    hs.add(octreePath);
+                    Octree tree=(Octree) deserializeObject(octreePath);
+                    tree.updatePath((Comparable) t.getValues().get(tree.getColumns()[0]),(Comparable) t.getValues().get(tree.getColumns()[1]),(Comparable)t.getValues().get(tree.getColumns()[2]),t.getPrimaryKey(),path);
+                    serializeObject(tree,octreePath);
+                }}
+        }
+    }
+    public void insertIntoIndex(Table table,Hashtable<String,Object> htblColNameValue,String path,Object clustringkey) throws DBAppException {
         HashSet<String> hs=new HashSet<>();
 
         for (String key:htblColNameValue.keySet()){
@@ -275,7 +290,7 @@ public class DBApp {
                 if(!hs.contains(octreePath)){
                     hs.add(octreePath);
                     Octree tree=(Octree) deserializeObject(octreePath);
-                    tree.insert((Comparable) htblColNameValue.get(tree.getColumns()[0]),(Comparable) htblColNameValue.get(tree.getColumns()[1]),(Comparable)htblColNameValue.get(tree.getColumns()[2]),path);
+                    tree.insert((Comparable) htblColNameValue.get(tree.getColumns()[0]),(Comparable) htblColNameValue.get(tree.getColumns()[1]),(Comparable)htblColNameValue.get(tree.getColumns()[2]),path,clustringkey);
                     serializeObject(tree,octreePath);
             }}
         }
@@ -957,7 +972,7 @@ public class DBApp {
                 Comparable x  = (Comparable) tuple.getValues().get(strarrColName[0]);
                 Comparable y  = (Comparable) tuple.getValues().get(strarrColName[1]);
                 Comparable z  = (Comparable) tuple.getValues().get(strarrColName[2]);
-                octree.insert(x,y,z, page.getPath());
+                octree.insert(x,y,z, page.getPath(),tuple.getPrimaryKey());
             }
             serializeObject(page, page.getPath());
         }
