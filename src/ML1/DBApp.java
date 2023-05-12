@@ -488,6 +488,30 @@ public class DBApp {
             throw new DBAppException("Tuple Not found");
 
     }
+    
+    public void deleteUsingIndex(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
+        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+        Hashtable<Object, String> toDelete = findUsingIndex(table, htblColNameValue);
+        //object is vector of points
+        for(Object key: toDelete.keySet()){
+            Vector<Point> points = (Vector<Point>)key;
+            String path = toDelete.get(key);
+            Octree octree = (Octree) deserializeObject(path);
+            for(Point point: points){
+                Hashtable<Object,String> references= point.getReference();
+                for(Object clusteringKey: references.keySet()){
+                    String pagePath = references.get(clusteringKey);
+                    Page page = (Page) deserializeObject(pagePath);
+                    page.getTuplesInPage().removeIf(tuple -> tuple.getPrimaryKey().equals(clusteringKey));
+                    serializeObject(page, pagePath);
+                }
+            }
+            serializeObject(octree, path);
+        }
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+    }
+    
+    
     public Hashtable<Object, String> findUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Hashtable<Object, String> result= new Hashtable<>();
         HashSet<String> octrees = new HashSet<>();
@@ -507,12 +531,25 @@ public class DBApp {
             if(htblColNameValue.containsKey(octree.getColumns()[2]))
                 z = (Comparable) htblColNameValue.get(octree.getColumns()[2]);
             Vector<Point> recResult = recGetPos(octree, x, y, z);
+            if(!recResult.isEmpty()){
+                result.put(recResult, path);
+            }
         }
         return result;
     }
     public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z){
-        if(octree.isLeaf())
-            return octree.getPoints();
+        if(octree.isLeaf()) {
+            Vector<Point> toDelete = new Vector<>();
+            for(Point point: octree.getPoints()){
+                if( (x==null || point.getX().equals(x)) &&
+                        (y==null || point.getY().equals(y)) &&
+                        (z==null || point.getZ().equals(z)) ){
+                    toDelete.add(point);
+                    octree.getPoints().remove(point);
+                }
+            }
+            return toDelete;
+        }
         Comparable midx = octree.getMid(octree.getTopLeftFront().getX(), octree.getBottomRightBack().getX()); //gets median of every dimension
         Comparable midy = octree.getMid(octree.getTopLeftFront().getY(), octree.getBottomRightBack().getY());
         Comparable midz = octree.getMid(octree.getTopLeftFront().getZ(), octree.getBottomRightBack().getZ());

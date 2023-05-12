@@ -10,7 +10,7 @@ public class Point implements Serializable {
 private Comparable x,y,z;
 //max/min?
 //Tuple reference;
-    Hashtable<Object,String> reference= new Hashtable<>();
+    private Hashtable<Object,String> reference= new Hashtable<>(); //clustering key and ???? path
 
     public Point(Comparable x, Comparable y, Comparable z){
         this.x = x;
