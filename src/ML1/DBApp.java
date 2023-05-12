@@ -506,17 +506,18 @@ public class DBApp {
                 y = (Comparable) htblColNameValue.get(octree.getColumns()[1]);
             if(htblColNameValue.containsKey(octree.getColumns()[2]))
                 z = (Comparable) htblColNameValue.get(octree.getColumns()[2]);
+            Vector<Point> recResult = recGetPos(octree, x, y, z);
         }
         return result;
     }
     public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z){
+        if(octree.isLeaf())
+            return octree.getPoints();
         Comparable midx = octree.getMid(octree.getTopLeftFront().getX(), octree.getBottomRightBack().getX()); //gets median of every dimension
         Comparable midy = octree.getMid(octree.getTopLeftFront().getY(), octree.getBottomRightBack().getY());
         Comparable midz = octree.getMid(octree.getTopLeftFront().getZ(), octree.getBottomRightBack().getZ());
         HashSet<Integer> pos = getPos(x, y, z, midx, midy, midz);
         Vector<Point> res= new Vector<Point>();
-        if(octree.isLeaf())
-            return octree.getPoints();
         for(Integer t: pos){
             res.addAll(recGetPos(octree.getBbs()[t], x, y, z));
         }
