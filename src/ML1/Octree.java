@@ -196,7 +196,7 @@ public class Octree implements Serializable {
         }
     }
     
-    public static Comparable getMid(Comparable min, Comparable max){
+    public Comparable getMid(Comparable min, Comparable max){
         if(min instanceof Integer){
             return ((int)min + (int)max )/2;
         }
@@ -206,14 +206,6 @@ public class Octree implements Serializable {
         if(min instanceof String){
             return getMiddleString((String)min,(String) max);
         }
-//        Calendar cal1 = Calendar.getInstance();
-//        cal1.setTime((Date)min);
-//        Calendar cal2 = Calendar.getInstance();
-//        cal2.setTime((Date)max);
-//        long diffInMillis = cal2.getTimeInMillis() - cal1.getTimeInMillis();
-//        Calendar middleCal =  Calendar.getInstance();
-//        middleCal.setTimeInMillis(cal1.getTimeInMillis() + diffInMillis / 2);
-//        return middleCal.getTime();
         return new Date((((Date)min).getTime() +((Date)max).getTime())/2);
         
     }
@@ -313,4 +305,9 @@ public class Octree implements Serializable {
         }
 
     }
+
+    public Point getTopLeftFront(){return topLeftFront;}
+
+    public Point getBottomRightBack(){return bottomRightBack;}
+
 }

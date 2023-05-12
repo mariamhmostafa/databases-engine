@@ -488,49 +488,99 @@ public class DBApp {
             throw new DBAppException("Tuple Not found");
 
     }
+    public Hashtable<Object, String> findUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
+        Hashtable<Object, String> result= new Hashtable<>();
+        HashSet<String> octrees = new HashSet<>();
+        for(String key: htblColNameValue.keySet()){
+            if(table.getOctreePaths().get(key) != null)
+                octrees.add(table.getOctreePaths().get(key));
+        }
+        for(String path: octrees){
+            Octree octree = (Octree) deserializeObject(path);
+            Comparable x = null;
+            Comparable y = null;
+            Comparable z = null;
+            if(htblColNameValue.containsKey(octree.getColumns()[0]))
+                x = (Comparable) htblColNameValue.get(octree.getColumns()[0]);
+            if(htblColNameValue.containsKey(octree.getColumns()[1]))
+                y = (Comparable) htblColNameValue.get(octree.getColumns()[1]);
+            if(htblColNameValue.containsKey(octree.getColumns()[2]))
+                z = (Comparable) htblColNameValue.get(octree.getColumns()[2]);
+        }
+        return result;
+    }
+    public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z){
+        Comparable midx = octree.getMid(octree.getTopLeftFront().getX(), octree.getBottomRightBack().getX()); //gets median of every dimension
+        Comparable midy = octree.getMid(octree.getTopLeftFront().getY(), octree.getBottomRightBack().getY());
+        Comparable midz = octree.getMid(octree.getTopLeftFront().getZ(), octree.getBottomRightBack().getZ());
+        HashSet<Integer> pos = getPos(x, y, z, midx, midy, midz);
+        Vector<Point> res= new Vector<Point>();
+        if(octree.isLeaf())
+            return octree.getPoints();
+        for(Integer t: pos){
+            res.addAll(recGetPos(octree.getBbs()[t], x, y, z));
+        }
+        return res;
+    }
+    public static HashSet<Integer> getPos(Comparable x, Comparable y, Comparable z, Comparable midx, Comparable midy, Comparable midz){
+        HashSet<Integer> pos = new HashSet<>();
+        pos.add(0); pos.add(1); pos.add(2); pos.add(3); pos.add(4); pos.add(5); pos.add(6); pos.add(7);
+        if(x!=null){
+            if(x.compareTo(midx)<=0){pos.remove(4); pos.remove(5); pos.remove(6); pos.remove(7);}
+            else{pos.remove(0); pos.remove(1); pos.remove(2); pos.remove(3);}
+        }
+        if(y!=null){
+            if(y.compareTo(midy)<=0){pos.remove(2); pos.remove(3); pos.remove(6); pos.remove(7);}
+            else{pos.remove(0); pos.remove(1); pos.remove(4); pos.remove(5);}
+        }
+        if(z!=null){
+            if(z.compareTo(midz)<=0){pos.remove(0); pos.remove(2); pos.remove(4); pos.remove(6);}
+            else{pos.remove(1); pos.remove(3); pos.remove(5); pos.remove(7);}
+        }
+        return pos;
+    }
 
     public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
         strTableName = strTableName.toLowerCase();
         if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
-        Table table = null;
-            table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
-            String primaryKeyName = table.getStrClusteringKeyColumn();
-            Object primaryKey = htblColNameValue.get(primaryKeyName);
-            if (primaryKey != null) {
-                deleteFromTable2(strTableName, htblColNameValue);
-            } else {
-                LinkedList<String> pagesToDelete = new LinkedList<>();
-                for (String path : table.getPaths()) {
-                    Page page = (Page) deserializeObject(path);
-                    LinkedList<Tuple> toDelete = new LinkedList<>();
-                    for (Tuple record : page.getTuplesInPage()) {
-                        boolean allConditionsMet = true;
-                        for (String key : htblColNameValue.keySet()) {
-                            if (!(record.getValues().get(key).equals(htblColNameValue.get(key)))) {
-                                allConditionsMet = false;
-                                break;
-                            }
-                        }
-                        if (allConditionsMet) {
-                            toDelete.add(record);
+        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+        String primaryKeyName = table.getStrClusteringKeyColumn();
+        Object primaryKey = htblColNameValue.get(primaryKeyName);
+        if (primaryKey != null) {
+            deleteFromTable2(strTableName, htblColNameValue);
+        } else {
+            LinkedList<String> pagesToDelete = new LinkedList<>();
+            for (String path : table.getPaths()) {
+                Page page = (Page) deserializeObject(path);
+                LinkedList<Tuple> toDelete = new LinkedList<>(); //use this tuple to delete from index
+                for (Tuple record : page.getTuplesInPage()) {
+                    boolean allConditionsMet = true;
+                    for (String key : htblColNameValue.keySet()) {
+                        if (!(record.getValues().get(key).equals(htblColNameValue.get(key)))) {
+                            allConditionsMet = false;
+                            break;
                         }
                     }
-                    while (!toDelete.isEmpty()) {
-                        page.getTuplesInPage().remove(toDelete.remove());
-                    }
-                    if (page.getTuplesInPage().isEmpty()) {
-                        pagesToDelete.add(path);
-                    } else {
-                        page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
-                        page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
-                        serializeObject(page, page.getPath());
+                    if (allConditionsMet) {
+                        toDelete.add(record);
                     }
                 }
-                while (!pagesToDelete.isEmpty()) {
-                    deletePage(table, pagesToDelete.remove());
+                while (!toDelete.isEmpty()) {
+                    page.getTuplesInPage().remove(toDelete.remove());
+                }
+                if (page.getTuplesInPage().isEmpty()) {
+                    pagesToDelete.add(path);
+                } else {
+                    page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
+                    page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
+                    serializeObject(page, page.getPath());
                 }
             }
-            serializeObject(table, "src/Resources/" + strTableName + ".ser");
+            while (!pagesToDelete.isEmpty()) {
+                deletePage(table, pagesToDelete.remove());
+            }
+        }
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
 
     }
     

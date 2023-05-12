@@ -12,7 +12,6 @@ public class Table implements Serializable {
     Hashtable<String,String> htblColNameMax;
     Vector<String> paths =new Vector<>();
     private int pageCounter=0;
-
     private Hashtable<String, String> octrees = new Hashtable<>();
 
     public Table(String strTableName,String strClusteringKeyColumn, Hashtable<String,String> htblColNameType, Hashtable<String,String>htblColNameMin,Hashtable<String,String> htblColNameMax){
