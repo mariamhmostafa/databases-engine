@@ -3,6 +3,7 @@ package ML1;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -318,7 +319,7 @@ public class Octree implements Serializable {
 
     }
 
-    public Iterator select(SQLTerm[] sqlTerm) {//we should enter the columns in the correct order of the octree columns
+    public Hashtable<Object, String> select(SQLTerm[] sqlTerm) {//we should enter the columns in the correct order of the octree columns
         Object valuex = sqlTerm[0]._objValue;
         Object valuey= sqlTerm[1]._objValue;
         Object valuez=sqlTerm[2]._objValue;
@@ -329,8 +330,7 @@ public class Octree implements Serializable {
         ArrayList<Integer>xchildren=new ArrayList<>();
         ArrayList<Integer>ychildren=new ArrayList<>();
         ArrayList<Integer>zchildren=new ArrayList<>();
-
-
+        Hashtable<Object,String> res=new Hashtable<>();
             if(!isLeaf) {
                 switch (sqlTerm[0]._strOperator) {
                     case ">":
@@ -419,14 +419,349 @@ public class Octree implements Serializable {
 
 
                 }
+                switch (sqlTerm[1]._strOperator) {
+                    case ">":
+                        if (compareTo((Comparable) valuey, midy) > 0) {
+                            ychildren.add(4);
+                            ychildren.add(5);
+                            ychildren.add(6);
+                            ychildren.add(7);
+                        }
+                        else{
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                            ychildren.add(4);
+                            ychildren.add(5);
+                            ychildren.add(6);
+                            ychildren.add(7);
+                        }
+                        break;
+                    case ">="://no matter the value compared to mid always have to search in them all
+                        ychildren.add(0);
+                        ychildren.add(1);
+                        ychildren.add(2);
+                        ychildren.add(3);
+                        ychildren.add(4);
+                        ychildren.add(5);
+                        ychildren.add(6);
+                        ychildren.add(7);
+                        break;
+                    case "<":
+                        if (compareTo((Comparable) valuey, midy) <= 0) {
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                        }else{
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                            ychildren.add(4);
+                            ychildren.add(5);
+                            ychildren.add(6);
+                            ychildren.add(7);
+                        }
+                    case "<=":
+                        if (compareTo((Comparable) valuey, midy) <= 0) {
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                        }else{
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                            ychildren.add(4);
+                            ychildren.add(5);
+                            ychildren.add(6);
+                            ychildren.add(7);
+                        }
+                        break;
+                    case "!=":
+                        ychildren.add(0);
+                        ychildren.add(1);
+                        ychildren.add(2);
+                        ychildren.add(3);
+                        ychildren.add(4);
+                        ychildren.add(5);
+                        ychildren.add(6);
+                        ychildren.add(7);
+                        break;
+                    default:
+                        if (compareTo((Comparable) valuey, midy) <= 0) {
+                            ychildren.add(0);
+                            ychildren.add(1);
+                            ychildren.add(2);
+                            ychildren.add(3);
+                        }else{
+                            ychildren.add(4);
+                            ychildren.add(5);
+                            ychildren.add(6);
+                            ychildren.add(7);
+                        }
+
+
+                }
+                switch (sqlTerm[2]._strOperator) {
+                    case ">":
+                        if (compareTo((Comparable) valuez, midz) > 0) {
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+                        else{
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+                        break;
+                    case ">="://no matter the value compared to mid always have to search in them all
+                        zchildren.add(0);
+                        zchildren.add(1);
+                        zchildren.add(2);
+                        zchildren.add(3);
+                        zchildren.add(4);
+                        zchildren.add(5);
+                        zchildren.add(6);
+                        zchildren.add(7);
+                        break;
+                    case "<":
+                        if (compareTo((Comparable) valuez, midz) <= 0) {
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                        }else{
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+                    case "<=":
+                        if (compareTo((Comparable) valuez, midz) <= 0) {
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                        }else{
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+                        break;
+                    case "!=":
+                        zchildren.add(0);
+                        zchildren.add(1);
+                        zchildren.add(2);
+                        zchildren.add(3);
+                        zchildren.add(4);
+                        zchildren.add(5);
+                        zchildren.add(6);
+                        zchildren.add(7);
+                        break;
+                    default:
+                        if (compareTo((Comparable) valuez, midz) <= 0) {
+                            zchildren.add(0);
+                            zchildren.add(1);
+                            zchildren.add(2);
+                            zchildren.add(3);
+                        }else{
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+
+
+                }
+                for(int i:xchildren){
+                    for(int j:ychildren){
+                        if(i==j) {
+                            for (int k : zchildren) {
+                                if(j==k){
+                                    bbs[i].select(sqlTerm);
+                                }
+                            }
+                        }
+                    }
+                }
+            }else{
+                for(Point p:points){
+                    if(isSelected(p.getX(),sqlTerm[0]._objValue, sqlTerm[0]._strOperator)&&
+                            isSelected(p.getY(),sqlTerm[1]._objValue, sqlTerm[1]._strOperator)&&
+                            isSelected(p.getZ(),sqlTerm[2]._objValue, sqlTerm[2]._strOperator)){
+                        for(Object ref:p.getReference().keySet()){
+                            res.put(ref,p.getReference().get(ref));
+                        }
+                    }
+                }
             }
+        return res;
+    }
+    public ArrayList<Integer> selectOnOneColumn(SQLTerm term){
+        Object value=term._objValue;
+        ArrayList<Integer> res=new ArrayList<>();
+        Comparable mid;
+        if(term._strColumnName.equals(columns[0])){
+            mid=getMid(topLeftFront.getX(), bottomRightBack.getX());
+        }else if(term._strColumnName.equals(columns[1])){
+            mid=getMid(topLeftFront.getY(), bottomRightBack.getY());
+        }else{
+            mid=getMid(topLeftFront.getZ(), bottomRightBack.getZ());
+        }
+        switch (term._strOperator) {
+            case ">":
+                if (compareTo((Comparable) value, mid) > 0) {
+                    res.add(4);
+                    res.add(5);
+                    res.add(6);
+                    res.add(7);
+                }
+                else{
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                    res.add(4);
+                    res.add(5);
+                    res.add(6);
+                    res.add(7);
+                }
+                break;
+            case ">="://no matter the value compared to mid always have to search in them all
+                res.add(0);
+                res.add(1);
+                res.add(2);
+                res.add(3);
+                res.add(4);
+                res.add(5);
+                res.add(6);
+                res.add(7);
+                break;
+            case "<":
+                if (compareTo((Comparable) value, mid) <= 0) {
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                }else{
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                    res.add(4);
+                    res.add(5);
+                    res.add(6);
+                    res.add(7);
+                }
+            case "<=":
+                if (compareTo((Comparable) value, mid) <= 0) {
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                }else{
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                    res.add(4);
+                    res.add(5);
+                    res.add(6);
+                    res.add(7);
+                }
+                break;
+            case "!=":
+                res.add(0);
+                res.add(1);
+                res.add(2);
+                res.add(3);
+                res.add(4);
+                res.add(5);
+                res.add(6);
+                res.add(7);
+                break;
+            default:
+                if (compareTo((Comparable) value, mid) <= 0) {
+                    res.add(0);
+                    res.add(1);
+                    res.add(2);
+                    res.add(3);
+                }else{
+                    res.add(4);
+                    res.add(5);
+                    res.add(6);
+                    res.add(7);
+                }
 
-        return null;
 
-
-
-
-
+        }
+        return res;
+    }
+    public boolean isSelected(Object value,Object objValue,String operator){
+        switch(operator){
+            case ">":
+                if(((Comparable)value).compareTo(objValue)>0){
+                    return true;
+                }
+                return false;
+            case ">=":
+                if(((Comparable)value).compareTo(objValue)>=0){
+                    return true;
+                }
+                return false;
+            case "<":
+                if(((Comparable)value).compareTo(objValue)<0){
+                    return true;
+                }
+                return false;
+            case "<=":
+                if(((Comparable)value).compareTo(objValue)<=0){
+                    return true;
+                }
+                return false;
+            case "!=":
+                if(value instanceof NullWrapper && objValue == null){
+                    return false;
+                }
+                if(value instanceof NullWrapper || objValue == null){
+                    return true;
+                }
+                if(((Comparable)value).compareTo(objValue)!=0){
+                    return true;
+                }
+                return false;
+            default:
+                if(value instanceof NullWrapper && objValue == null){
+                    return true;
+                }
+                if(value instanceof NullWrapper || objValue == null){
+                    return false;
+                }
+                if(((Comparable)value).compareTo(objValue)==0){
+                    return true;
+                }
+                return false;
+        }
 
     }
 }

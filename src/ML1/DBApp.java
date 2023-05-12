@@ -696,15 +696,57 @@ public class DBApp {
         }
     }
     
-    
-    
+    public boolean shouldUseIndex(SQLTerm[] arrSQLTerms, String[] strarrOperators) throws DBAppException {
+        Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
+        for(int i=0;i<arrSQLTerms.length;i++){
+            if(table.getOctreePaths().contains(arrSQLTerms[i]._strColumnName)){
+                Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
+                if(tree.getColumns()[1].equals(arrSQLTerms[i+1]._strColumnName)&&
+                        tree.getColumns()[2].equals(arrSQLTerms[i+2]._strColumnName)&&
+                        strarrOperators[i].toLowerCase().equals("and") &&
+                        strarrOperators[i+1].toLowerCase().equals("and")){
+                    serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
+                    serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
+                    return true;
+                }
+                serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
+            }
+        }
+        serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
+        return false;
+    }
+    public Iterator selectUsingIndex(SQLTerm[] term) throws DBAppException {
+        Table table = (Table) deserializeObject("src/resources/" + term[0]._strTableName + ".ser");
+        Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(term[0]._strColumnName));
+        HashSet<Tuple> tuples = new HashSet<>();
+        Hashtable<Object,String> res=tree.select(term);
+        for(Object primaryKey:res.keySet()){
+            Page page = (Page) deserializeObject(res.get(primaryKey));
+            for(Tuple tuple:page.getTuplesInPage()){
+                if(((Comparable)tuple.getPrimaryKey()).compareTo((Comparable)primaryKey)==0){
+                    tuples.add(tuple);
+                }
+            }
+            serializeObject(page,res.get(primaryKey));
+        }
+        serializeObject(tree,table.getOctreePaths().get(term[0]._strColumnName));
+        serializeObject(table, "src/Resources/" +term[0]._strTableName  + ".ser");
+         return tuples.iterator();
+    }
+
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
             throws DBAppException{
         validTerms(arrSQLTerms,strarrOperators);
         ArrayList<HashSet<Tuple>> arrOfArr = new ArrayList<>();
+        if(shouldUseIndex(arrSQLTerms,strarrOperators)){
+            //assuming all entered columns are with index and anded together and entered in the correct order
+            selectUsingIndex(arrSQLTerms);
+        }
         for(SQLTerm sqlTerm : arrSQLTerms){
             arrOfArr.add(getSelectedTuples(sqlTerm));
         }
+
+
         HashSet<Tuple> filtered = arrOfArr.get(0);
         for(int i=0; i<strarrOperators.length; i++){
             String operator = strarrOperators[i];
