@@ -267,9 +267,9 @@ public class DBApp {
 
 //     why   serializeObject(table, "src/Resources/" + strTableName + ".ser");
     }
+    
     public void updateIndex(Table table,Tuple t,String path) throws DBAppException {
         HashSet<String> hs=new HashSet<>();
-
         for (String key:t.getValues().keySet()){
             String octreePath=table.getOctreePaths().get(key);
             if (octreePath!=null){
@@ -281,6 +281,7 @@ public class DBApp {
                 }}
         }
     }
+    
     public void insertIntoIndex(Table table,Hashtable<String,Object> htblColNameValue,String path,Object clustringkey) throws DBAppException {
         HashSet<String> hs=new HashSet<>();
 
@@ -442,6 +443,57 @@ public class DBApp {
         }
     }
     
+    public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
+        strTableName = strTableName.toLowerCase();
+        if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
+        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+        for(String key: htblColNameValue.keySet()){
+            if(table.getOctreePaths().get(key) != null) {
+                deleteUsingIndex(strTableName, htblColNameValue);
+                return;
+            }
+        }
+        String primaryKeyName = table.getStrClusteringKeyColumn();
+        Object primaryKey = htblColNameValue.get(primaryKeyName);
+        if (primaryKey != null) {
+            deleteFromTable2(strTableName, htblColNameValue);
+        } else {
+            LinkedList<String> pagesToDelete = new LinkedList<>();
+            for (String path : table.getPaths()) {
+                Page page = (Page) deserializeObject(path);
+                LinkedList<Tuple> toDelete = new LinkedList<>(); //use this tuple to delete from index
+                for (Tuple record : page.getTuplesInPage()) {
+                    boolean allConditionsMet = true;
+                    for (String key : htblColNameValue.keySet()) {
+                        if (!(record.getValues().get(key).equals(htblColNameValue.get(key)))) {
+                            allConditionsMet = false;
+                            break;
+                        }
+                    }
+                    if (allConditionsMet) {
+                        toDelete.add(record);
+                    }
+                }
+                while (!toDelete.isEmpty()) {
+                    page.getTuplesInPage().remove(toDelete.remove());
+                }
+                if (page.getTuplesInPage().isEmpty()) {
+                    pagesToDelete.add(path);
+                } else {
+                    page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
+                    page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
+                    serializeObject(page, page.getPath());
+                }
+            }
+            while (!pagesToDelete.isEmpty()) {
+                deletePage(table, pagesToDelete.remove());
+            }
+        }
+        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        
+    }
+    
+    
     public void deleteFromTable2(String strTableName,
                                 Hashtable<String,Object> htblColNameValue) throws DBAppException {
 
@@ -491,10 +543,10 @@ public class DBApp {
     
     public void deleteUsingIndex(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
-        Hashtable<Object, String> toDelete = findUsingIndex(table, htblColNameValue);
+        Hashtable<Object, String> toDelete = findAndDeleteUsingIndex(table, htblColNameValue);
         //object is vector of points
         for(Object key: toDelete.keySet()){
-            Vector<Point> points = (Vector<Point>)key;
+            Vector<Point> points = (Vector<Point>) key;
             String path = toDelete.get(key);
             Octree octree = (Octree) deserializeObject(path);
             for(Point point: points){
@@ -512,7 +564,7 @@ public class DBApp {
     }
     
     
-    public Hashtable<Object, String> findUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
+    public Hashtable<Object, String> findAndDeleteUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Hashtable<Object, String> result= new Hashtable<>();
         HashSet<String> octrees = new HashSet<>();
         for(String key: htblColNameValue.keySet()){
@@ -578,49 +630,6 @@ public class DBApp {
         return pos;
     }
 
-    public void deleteFromTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
-        strTableName = strTableName.toLowerCase();
-        if(!someAreValid(strTableName,htblColNameValue)) throw new DBAppException("Wrong values");
-        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
-        String primaryKeyName = table.getStrClusteringKeyColumn();
-        Object primaryKey = htblColNameValue.get(primaryKeyName);
-        if (primaryKey != null) {
-            deleteFromTable2(strTableName, htblColNameValue);
-        } else {
-            LinkedList<String> pagesToDelete = new LinkedList<>();
-            for (String path : table.getPaths()) {
-                Page page = (Page) deserializeObject(path);
-                LinkedList<Tuple> toDelete = new LinkedList<>(); //use this tuple to delete from index
-                for (Tuple record : page.getTuplesInPage()) {
-                    boolean allConditionsMet = true;
-                    for (String key : htblColNameValue.keySet()) {
-                        if (!(record.getValues().get(key).equals(htblColNameValue.get(key)))) {
-                            allConditionsMet = false;
-                            break;
-                        }
-                    }
-                    if (allConditionsMet) {
-                        toDelete.add(record);
-                    }
-                }
-                while (!toDelete.isEmpty()) {
-                    page.getTuplesInPage().remove(toDelete.remove());
-                }
-                if (page.getTuplesInPage().isEmpty()) {
-                    pagesToDelete.add(path);
-                } else {
-                    page.setMaxValInPage(page.getTuplesInPage().lastElement().getPrimaryKey());
-                    page.setMinValInPage(page.getTuplesInPage().firstElement().getPrimaryKey());
-                    serializeObject(page, page.getPath());
-                }
-            }
-            while (!pagesToDelete.isEmpty()) {
-                deletePage(table, pagesToDelete.remove());
-            }
-        }
-        serializeObject(table, "src/Resources/" + strTableName + ".ser");
-
-    }
     
     public void deletePage(Table table, String pathName) throws DBAppException{
         table.getPaths().remove(pathName);
