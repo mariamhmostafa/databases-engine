@@ -735,11 +735,11 @@ public class DBApp {
         serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
         return arr;
     }
-    public Iterator selectUsingIndex(SQLTerm[] term) throws DBAppException {
-        Table table = (Table) deserializeObject("src/resources/" + term[0]._strTableName + ".ser");
-        Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(term[0]._strColumnName));
+    public HashSet<Tuple> selectUsingIndex(SQLTerm[] arrSQLTerms, int[] arr) throws DBAppException {
+        Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
+        Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
         HashSet<Tuple> tuples = new HashSet<>();
-        Hashtable<Object,String> res=tree.select(term);
+        Hashtable<Object,String> res=tree.select(arrSQLTerms,arr);
         for(Object primaryKey:res.keySet()){
             Page page = (Page) deserializeObject(res.get(primaryKey));
             for(Tuple tuple:page.getTuplesInPage()){
@@ -749,40 +749,49 @@ public class DBApp {
             }
             serializeObject(page,res.get(primaryKey));
         }
-        serializeObject(tree,table.getOctreePaths().get(term[0]._strColumnName));
-        serializeObject(table, "src/Resources/" +term[0]._strTableName  + ".ser");
-         return tuples.iterator();
+        serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
+        serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
+         return tuples;
     }
 
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
             throws DBAppException{
         validTerms(arrSQLTerms,strarrOperators);
         ArrayList<HashSet<Tuple>> arrOfArr = new ArrayList<>();
-//        //if(shouldUseIndex(arrSQLTerms,strarrOperators)){
-//            //assuming all entered columns are with index and anded together and entered in the correct order
-//            selectUsingIndex(arrSQLTerms);
-//        }
-//        for(SQLTerm sqlTerm : arrSQLTerms){
-//            arrOfArr.add(getSelectedTuples(sqlTerm));
-//        }
+        int i=0;
+        for( i=0;i<arrSQLTerms.length;i++){
+           int[] arr=shouldUseIndex(arrSQLTerms,i,strarrOperators);
+           if(arr[0]==-1){
+               break;
+           }
+           for(int j=i;j<arr[0];j++){
+               arrOfArr.add(getSelectedTuples(arrSQLTerms[j]));
+           }
+            arrOfArr.add(selectUsingIndex(arrSQLTerms,arr));
+            i=arr[0]+2;//to get the next unindexed sqlterms
+        }
+        while(i<arrSQLTerms.length){
+            arrOfArr.add(getSelectedTuples(arrSQLTerms[i]));
+            i++;
+        }
 
 
         HashSet<Tuple> filtered = arrOfArr.get(0);
-        for(int i=0; i<strarrOperators.length; i++){
-            String operator = strarrOperators[i];
+        for(int j=0; j<strarrOperators.length; j++){
+            String operator = strarrOperators[j];
             switch(operator.toLowerCase()){
                 case "or":
-                    filtered.addAll(arrOfArr.get(i+1));
+                    filtered.addAll(arrOfArr.get(j+1));
                     break;
                 case "and":
-                    for(Tuple t : arrOfArr.get(i+1)){
+                    for(Tuple t : arrOfArr.get(j+1)){
                         if(!filtered.contains(t)){
                             filtered.remove(t);
                         }
                     }
                     break;
                 default:
-                    for(Tuple t : arrOfArr.get(i+1)){
+                    for(Tuple t : arrOfArr.get(j+1)){
                         if(filtered.contains(t)) {
                             filtered.remove(t);
                         }else{

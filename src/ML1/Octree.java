@@ -324,10 +324,10 @@ public class Octree implements Serializable {
 
     }
 
-    public Hashtable<Object, String> select(SQLTerm[] sqlTerm) {//we should enter the columns in the correct order of the octree columns
-        Object valuex = sqlTerm[0]._objValue;
-        Object valuey= sqlTerm[1]._objValue;
-        Object valuez=sqlTerm[2]._objValue;
+    public Hashtable<Object, String> select(SQLTerm[] sqlTerm,int[] arr) {//we should enter the columns in the correct order of the octree columns
+        Object valuex = sqlTerm[arr[1]]._objValue;
+        Object valuey= sqlTerm[arr[2]]._objValue;
+        Object valuez=sqlTerm[arr[3]]._objValue;
         Comparable midx= getMid(topLeftFront.getX(), bottomRightBack.getX());
         Comparable midy= getMid(topLeftFront.getY(), bottomRightBack.getY());
         Comparable midz= getMid(topLeftFront.getZ(), bottomRightBack.getZ());
@@ -603,7 +603,7 @@ public class Octree implements Serializable {
                         if(i==j) {
                             for (int k : zchildren) {
                                 if(j==k){
-                                    bbs[i].select(sqlTerm);
+                                    bbs[i].select(sqlTerm,arr);
                                 }
                             }
                         }
