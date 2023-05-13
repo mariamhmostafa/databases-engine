@@ -696,24 +696,44 @@ public class DBApp {
         }
     }
     
-    public boolean shouldUseIndex(SQLTerm[] arrSQLTerms, String[] strarrOperators) throws DBAppException {
+    public int[] shouldUseIndex(SQLTerm[] arrSQLTerms,int indx, String[] strarrOperators) throws DBAppException {
+        int[] arr=new int[4];
+        Arrays.fill(arr,-1);
+        if(arrSQLTerms.length<3)return arr;
+
         Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
-        for(int i=0;i<arrSQLTerms.length;i++){
+        for(int i=indx;i<arrSQLTerms.length;i++){
+            int count=0;
+            Arrays.fill(arr,-1);
             if(table.getOctreePaths().contains(arrSQLTerms[i]._strColumnName)){
                 Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
-                if(tree.getColumns()[1].equals(arrSQLTerms[i+1]._strColumnName)&&
-                        tree.getColumns()[2].equals(arrSQLTerms[i+2]._strColumnName)&&
-                        strarrOperators[i].toLowerCase().equals("and") &&
-                        strarrOperators[i+1].toLowerCase().equals("and")){
-                    serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
-                    serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
-                    return true;
+                //-------------------------------------------------------------------------------
+                String [] columns= tree.getColumns();
+
+                for (int j=i;j<i+3;j++){
+                    if (tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)!=null){
+                    if(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]==-1){
+                        if(j!=i+2){if(!strarrOperators[j].equalsIgnoreCase("AND")){
+                        break;
+                        }
+                        }
+                        arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]=j;
+
+                        count++;
+                    }}
+                    else {
+                        break;
+                    }
+                }
+                if (count==3){
+                    arr[0]=i;
+                    break;
                 }
                 serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
             }
         }
         serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
-        return false;
+        return arr;
     }
     public Iterator selectUsingIndex(SQLTerm[] term) throws DBAppException {
         Table table = (Table) deserializeObject("src/resources/" + term[0]._strTableName + ".ser");
@@ -738,13 +758,13 @@ public class DBApp {
             throws DBAppException{
         validTerms(arrSQLTerms,strarrOperators);
         ArrayList<HashSet<Tuple>> arrOfArr = new ArrayList<>();
-        if(shouldUseIndex(arrSQLTerms,strarrOperators)){
-            //assuming all entered columns are with index and anded together and entered in the correct order
-            selectUsingIndex(arrSQLTerms);
-        }
-        for(SQLTerm sqlTerm : arrSQLTerms){
-            arrOfArr.add(getSelectedTuples(sqlTerm));
-        }
+//        //if(shouldUseIndex(arrSQLTerms,strarrOperators)){
+//            //assuming all entered columns are with index and anded together and entered in the correct order
+//            selectUsingIndex(arrSQLTerms);
+//        }
+//        for(SQLTerm sqlTerm : arrSQLTerms){
+//            arrOfArr.add(getSelectedTuples(sqlTerm));
+//        }
 
 
         HashSet<Tuple> filtered = arrOfArr.get(0);

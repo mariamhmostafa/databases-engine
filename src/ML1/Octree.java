@@ -10,7 +10,8 @@ import java.util.*;
 
 
 public class Octree implements Serializable {
-    private static String[] columns = new String[3];
+    private String[]columns=new String[3];
+    private static Hashtable<String,Integer> htblColumns= new Hashtable<String,Integer>();
     private Octree[] bbs = new Octree[8];
     private Vector<Point> points = new Vector<>();
     private Point topLeftFront;
@@ -31,9 +32,13 @@ public class Octree implements Serializable {
     public Octree(Comparable xmin, Comparable ymin, Comparable zmin, Comparable xmax, Comparable ymax, Comparable zmax, String x, String y, String z) {
         topLeftFront = new Point(xmin, ymin, zmin);
         bottomRightBack = new Point(xmax, ymax, zmax);
-        columns[0] = x;
-        columns[1] = y;
-        columns[2] = z;
+        htblColumns.put(x,0);
+        htblColumns.put(y,1);
+        htblColumns.put(z,2);
+        columns[0]=x;
+        columns[1]=y;
+        columns[2]=z;
+
     }
 
     public Octree[] getBbs() {
@@ -763,6 +768,10 @@ public class Octree implements Serializable {
                 return false;
         }
 
+    }
+
+    public static Hashtable<String, Integer> getHtblColumns() {
+        return htblColumns;
     }
 }
 
