@@ -394,6 +394,13 @@ public class DBApp {
                          } else if (colType.equals("java.lang.double")) {
                              clusteringKeyValue = Double.parseDouble(strClusteringKeyValue);
                          }
+                         if (table.getOctreePaths().get(primaryKeyName)!=null){
+                             Octree octree = (Octree) deserializeObject(table.getOctreePaths().get(primaryKeyName));
+                             serializeObject(table,"src/Resources/" + strTableName + ".ser");
+                             updateUsingIndex(octree,clusteringKeyValue,htblColNameValue,table);
+                             return;
+                         }
+                         
                          int indexInPage = -1;
                          for (String pathName : table.getPaths()) {
                              Page page = (Page) deserializeObject(pathName);
@@ -435,7 +442,16 @@ public class DBApp {
              throw new DBAppException(e);
          }
      }
-     
+    
+    private void updateUsingIndex(Octree octree, Object clusteringKeyValue, Hashtable<String, Object> htblColNameValue,Table table) throws DBAppException{
+        Hashtable <String, Object> toDelete = new Hashtable<>();
+        toDelete.put(table.getStrClusteringKeyColumn(),clusteringKeyValue);
+        ArrayList <Tuple> res = deleteUsingIndex(table.strTableName,toDelete);
+        Tuple oldTuple = res.get(0);
+        oldTuple.getValues().putAll(htblColNameValue);
+        insertIntoTable(table.strTableName,oldTuple.getValues());
+    }
+    
     public void updateInPage(Page page,int index,Hashtable<String,Object> htblColNameValue){
         for(String key: htblColNameValue.keySet()){
             Object value = htblColNameValue.get(key);
