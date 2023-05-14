@@ -325,6 +325,8 @@ public class Octree implements Serializable {
     }
 
     public Hashtable<Object, String> select(SQLTerm[] sqlTerm,int[] arr) {//we should enter the columns in the correct order of the octree columns
+       System.out.println("SELECT INDEX");
+
         Object valuex = sqlTerm[arr[1]]._objValue;
         Object valuey= sqlTerm[arr[2]]._objValue;
         Object valuez=sqlTerm[arr[3]]._objValue;
@@ -337,7 +339,7 @@ public class Octree implements Serializable {
         ArrayList<Integer>zchildren=new ArrayList<>();
         Hashtable<Object,String> res=new Hashtable<>();
             if(!isLeaf) {
-                switch (sqlTerm[0]._strOperator) {
+                switch (sqlTerm[arr[1]]._strOperator) {
                     case ">":
                         if (compareTo((Comparable) valuex, midx) > 0) {
                             xchildren.add(4);
@@ -424,7 +426,7 @@ public class Octree implements Serializable {
 
 
                 }
-                switch (sqlTerm[1]._strOperator) {
+                switch (sqlTerm[arr[2]]._strOperator) {
                     case ">":
                         if (compareTo((Comparable) valuey, midy) > 0) {
                             ychildren.add(4);
@@ -511,7 +513,7 @@ public class Octree implements Serializable {
 
 
                 }
-                switch (sqlTerm[2]._strOperator) {
+                switch (sqlTerm[arr[3]]._strOperator) {
                     case ">":
                         if (compareTo((Comparable) valuez, midz) > 0) {
                             zchildren.add(4);
@@ -611,9 +613,9 @@ public class Octree implements Serializable {
                 }
             }else{
                 for(Point p:points){
-                    if(isSelected(p.getX(),sqlTerm[0]._objValue, sqlTerm[0]._strOperator)&&
-                            isSelected(p.getY(),sqlTerm[1]._objValue, sqlTerm[1]._strOperator)&&
-                            isSelected(p.getZ(),sqlTerm[2]._objValue, sqlTerm[2]._strOperator)){
+                    if(isSelected(p.getX(),sqlTerm[arr[1]]._objValue, sqlTerm[arr[1]]._strOperator)&&
+                            isSelected(p.getY(),sqlTerm[arr[2]]._objValue, sqlTerm[arr[2]]._strOperator)&&
+                            isSelected(p.getZ(),sqlTerm[arr[3]]._objValue, sqlTerm[arr[3]]._strOperator)){
                         for(Object ref:p.getReference().keySet()){
                             res.put(ref,p.getReference().get(ref));
                         }

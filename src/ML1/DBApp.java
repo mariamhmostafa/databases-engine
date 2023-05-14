@@ -63,57 +63,63 @@ public class DBApp {
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
-//        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+1+"Octree.ser");
-//        printOctree(octree);
-//        SQLTerm[] arrSQLTerms;
-//        arrSQLTerms = new SQLTerm[2];
-//        arrSQLTerms[0] = new SQLTerm();
-//        arrSQLTerms[1] = new SQLTerm();
-//        arrSQLTerms[0]._strTableName = "Student";
-//        arrSQLTerms[0]._strColumnName= "name";
-//        arrSQLTerms[0]._strOperator = ">=";
-//        arrSQLTerms[0]._objValue = null;
+        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
+        printOctree(octree);
+        SQLTerm[] arrSQLTerms;
+        arrSQLTerms = new SQLTerm[3];
+        arrSQLTerms[0] = new SQLTerm();
+        arrSQLTerms[1] = new SQLTerm();
+        arrSQLTerms[2] = new SQLTerm();
+        String[]strarrOperators = new String[2];
+        arrSQLTerms[0]._strTableName = "Student";
+        arrSQLTerms[0]._strColumnName= "name";
+        arrSQLTerms[0]._strOperator = ">=";
+        arrSQLTerms[0]._objValue = "frfr";
 //
-//        arrSQLTerms[1]._strTableName = "Student";
-//        arrSQLTerms[1]._strColumnName= "gpa";
-//        arrSQLTerms[1]._strOperator = "=";
-//        arrSQLTerms[1]._objValue = new Double( 2.6 );
-//        String[]strarrOperators = new String[1];
-//        strarrOperators[0] = "OR";
+        arrSQLTerms[1]._strTableName = "Student";
+        arrSQLTerms[1]._strColumnName= "gpa";
+        arrSQLTerms[1]._strOperator = "=";
+        arrSQLTerms[1]._objValue = new Double( 2.6 );
+
+        strarrOperators[0] = "and";
+
+        arrSQLTerms[2]._strTableName = "Student";
+        arrSQLTerms[2]._strColumnName= "id";
+        arrSQLTerms[2]._strOperator = ">";
+        arrSQLTerms[2]._objValue = new Integer( 16 );
+        strarrOperators[1] = "and";
 //
-//        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
         
 //        Hashtable toUpdate = new Hashtable();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
     
-//        while(resultSet.hasNext()) {
-//            Tuple t = (Tuple) resultSet.next();
-//            System.out.println();
-//            for (String key : t.getValues().keySet()) {
-//                System.out.println(key + " value: " + t.getValues().get(key).toString());
-//            }
-//        }
+        while(resultSet.hasNext()) {
+            Tuple t = (Tuple) resultSet.next();
+            System.out.println();
+            for (String key : t.getValues().keySet()) {
+                System.out.println(key + " value: " + t.getValues().get(key).toString());
+            }
+        }
         
     }
 
 
-//    private static void printOctree(Octree octree){
-//        if(octree.isLeaf()) {
-//            for (Point p : octree.getPoints()) {
-//                System.out.print("x:" + p.getX() + " y:" + p.getY() + " z:" + p.getZ());
-//                for (String page : p.getPagePath()) {
-//                    System.out.print(" page:" + page);
-//                }
-//                System.out.println();
-//            }
-//        } else{
-//            for(Octree bb: octree.getBbs()){
-//                printOctree(bb);
-//            }
-//        }
-//    }
+    private static void printOctree(Octree octree){
+        if(octree.isLeaf()) {
+            for (Point p : octree.getPoints()) {
+                System.out.print("x:" + p.getX() + " y:" + p.getY() + " z:" + p.getZ());
+                System.out.println( p.getReference().toString());
+
+            }
+        } else{
+            for(Octree bb: octree.getBbs()){
+                printOctree(bb);
+            }
+        }
+    }
     public void init() {
         FileWriter writer = null;
         try {
@@ -697,6 +703,7 @@ public class DBApp {
     }
     
     public int[] shouldUseIndex(SQLTerm[] arrSQLTerms,int indx, String[] strarrOperators) throws DBAppException {
+        System.out.println("InShouldUseIndex");
         int[] arr=new int[4];
         Arrays.fill(arr,-1);
         if(arrSQLTerms.length<3)return arr;
@@ -705,37 +712,43 @@ public class DBApp {
         for(int i=indx;i<arrSQLTerms.length;i++){
             int count=0;
             Arrays.fill(arr,-1);
-            if(table.getOctreePaths().contains(arrSQLTerms[i]._strColumnName)){
+            if(table.getOctreePaths().get(arrSQLTerms[i]._strColumnName)!=null){
                 Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
                 //-------------------------------------------------------------------------------
                 String [] columns= tree.getColumns();
 
                 for (int j=i;j<i+3;j++){
                     if (tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)!=null){
-                    if(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]==-1){
-                        if(j!=i+2){if(!strarrOperators[j].equalsIgnoreCase("AND")){
-                        break;
-                        }
+                         if(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]==-1){
+                           if(j!=i+2){
+                               if(!strarrOperators[j].equalsIgnoreCase("AND")){
+                                break;
+                           }
                         }
                         arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]=j;
-
+                           //System.out.println(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]+" "+count);
                         count++;
                     }}
                     else {
                         break;
                     }
                 }
+                System.out.println(count);
                 if (count==3){
                     arr[0]=i;
                     break;
                 }
                 serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
             }
+            else {
+                System.out.println(table.getOctreePaths().toString());
+            }
         }
         serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
         return arr;
     }
     public HashSet<Tuple> selectUsingIndex(SQLTerm[] arrSQLTerms, int[] arr) throws DBAppException {
+        System.out.println("InSelectUsingIndex");
         Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
         Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
         HashSet<Tuple> tuples = new HashSet<>();
@@ -762,9 +775,11 @@ public class DBApp {
         for( i=0;i<arrSQLTerms.length;i++){
            int[] arr=shouldUseIndex(arrSQLTerms,i,strarrOperators);
            if(arr[0]==-1){
+               System.out.println(i+" "+arr[0]);
                break;
            }
            for(int j=i;j<arr[0];j++){
+               System.out.println("elmafrod mated5olsh");
                arrOfArr.add(getSelectedTuples(arrSQLTerms[j]));
            }
             arrOfArr.add(selectUsingIndex(arrSQLTerms,arr));
@@ -784,10 +799,14 @@ public class DBApp {
                     filtered.addAll(arrOfArr.get(j+1));
                     break;
                 case "and":
-                    for(Tuple t : arrOfArr.get(j+1)){
-                        if(!filtered.contains(t)){
-                            filtered.remove(t);
+                    ArrayList<Tuple> remove=new ArrayList<>();
+                    for(Tuple t : filtered){
+                        if(!arrOfArr.get(j+1).contains(t)){
+                            remove.add(t);
                         }
+                    }
+                    for(Tuple t:remove){
+                        filtered.remove(t);
                     }
                     break;
                 default:
