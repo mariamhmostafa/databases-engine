@@ -1,6 +1,5 @@
 package ML1;
 
-import java.beans.Transient;
 import java.io.Serializable;
 import java.util.*;
 
@@ -58,5 +57,3 @@ public class Table implements Serializable {
         this.pageCounter = pageCounter;
     }
 }
-//if within max and min: deserialize then binary search and then insert
-//class properties

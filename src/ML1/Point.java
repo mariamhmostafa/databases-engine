@@ -1,15 +1,11 @@
 package ML1;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Point implements Serializable {
 
     private Comparable x,y,z;
-//max/min?
-//Tuple reference;
     private Hashtable<Object,String> reference= new Hashtable<>(); //clustering key and ???? path
 
     public Point(Comparable x, Comparable y, Comparable z){
@@ -28,11 +24,6 @@ public class Point implements Serializable {
         this.z = z;
         this.reference.put(clusteringKey,path);
     }
-    
-//    public void insert(String path) {
-//        pagePath.add(path);
-//    }
-
 
     public Comparable getX(){
         return x;

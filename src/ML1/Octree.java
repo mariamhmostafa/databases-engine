@@ -3,8 +3,6 @@ package ML1;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -42,14 +40,10 @@ public class Octree implements Serializable {
     public Vector<Point> getPoints() {
         return points;
     }
-
+    
     public void setPoints(Vector<Point> points) {
         this.points = points;
     }
-
-//    public boolean isLeaf(){
-//        return bbs.isEmpty();
-//    }
 
     public void insert(Comparable x, Comparable y, Comparable z, String path, Object clustringkey) throws DBAppException {
         if(isLeaf && points.size()<maxEntries){
@@ -60,37 +54,30 @@ public class Octree implements Serializable {
                     p.getReference().put(clustringkey,path);
                     return;
                 }
-
             }
-
             points.add(newpoint);
             return;
         }
-        else {
-
-            Comparable midx = getMid(topLeftFront.getX(), bottomRightBack.getX()); //gets median of every dimension
-            Comparable midy = getMid(topLeftFront.getY(), bottomRightBack.getY());
-            Comparable midz = getMid(topLeftFront.getZ(), bottomRightBack.getZ());
-
-            //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
-            int pos = getPos(x, y, z, midx, midy, midz);
-            if (!isLeaf)
-                bbs[pos].insert(x, y, z, path, clustringkey);
-            else {
-                isLeaf = false;
-                for(int i=0; i< bbs.length; i++){
-                    Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
-                    bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5],this.getColumns()[0],this.getColumns()[1],this.getColumns()[2]);
+        
+        Comparable midx = getMid(topLeftFront.getX(), bottomRightBack.getX()); //gets median of every dimension
+        Comparable midy = getMid(topLeftFront.getY(), bottomRightBack.getY());
+        Comparable midz = getMid(topLeftFront.getZ(), bottomRightBack.getZ());
+        //Comparable newminx, newminy, newminz, newmaxx, newmaxy, newmaxz;
+        int pos = getPos(x, y, z, midx, midy, midz);
+        if (isLeaf){
+            isLeaf = false;
+            for (int i = 0; i < bbs.length; i++) {
+                Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
+                bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5], this.getColumns()[0], this.getColumns()[1], this.getColumns()[2]);
+            }
+            for (Point p : points) {
+                int rePos = getPos(p.getX(), p.getY(), p.getZ(), midx, midy, midz);
+                for (Object primarykey : p.getReference().keySet()) {
+                    bbs[rePos].insert(p.getX(), p.getY(), p.getZ(), p.getReference().get(primarykey), primarykey);
                 }
-                for (Point p : points) {
-                    int rePos = getPos(p.getX(), p.getY(), p.getZ(), midx, midy, midz);
-                    for (Object primarykey :p.getReference().keySet() ) {
-                        bbs[rePos].insert(p.getX(), p.getY(), p.getZ(),p.getReference().get(primarykey) ,primarykey);
-                    }
-                }
-                bbs[pos].insert(x, y, z, path,clustringkey);
             }
         }
+        bbs[pos].insert(x, y, z, path, clustringkey);
     }
     
     public Comparable[] getNewBounds(Comparable midx, Comparable midy, Comparable midz, int pos){
@@ -207,7 +194,6 @@ public class Octree implements Serializable {
             return getMiddleString((String)min,(String) max);
         }
         return new Date((((Date)min).getTime() +((Date)max).getTime())/2);
-        
     }
 
     static String getMiddleString(String S, String T){
@@ -243,11 +229,11 @@ public class Octree implements Serializable {
             }
             a1[i] = (int)a1[i] / 2;
         }
-        String s ="";
+        StringBuilder s = new StringBuilder();
         for (int i = 1; i <= N; i++) {
-            s += (char)(a1[i] + 97);
+            s.append((char) (a1[i] + 97));
         }
-        return s;
+        return s.toString();
     }
 
     public static String getVal(String key) {
@@ -299,8 +285,8 @@ public class Octree implements Serializable {
             }
         }
         else{
-            for(int i=0;i< bbs.length;i++){
-                bbs[i].updatePath(x,y,z,clustringkey,path);
+            for (Octree bb : bbs) {
+                bb.updatePath(x, y, z, clustringkey, path);
             }
         }
 

@@ -15,14 +15,16 @@ public class DBApp {
         dbApp.init();
         
         String strTableName = "student";
-        Hashtable htblColNameType = new Hashtable();
+        Hashtable<String,String> htblColNameType = new Hashtable<>();
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
         htblColNameType.put("gpa", "java.lang.Double");
+        
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "a");
         colMin.put("gpa", "0.0");
+        
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "zzzzzzzzzzz");
@@ -30,37 +32,42 @@ public class DBApp {
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
         
         //////inserting into table:
-        Hashtable htblColNameValue1 = new Hashtable( );
+        Hashtable<String,Object> htblColNameValue1 = new Hashtable<>();
         htblColNameValue1.put("id", 19);
-        htblColNameValue1.put("name", new String("mariam" ) );
-        htblColNameValue1.put("gpa", new Double( 0.87) );
+        htblColNameValue1.put("name", "mariam");
+        htblColNameValue1.put("gpa", 0.87);
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
-        Hashtable htblColNameValue2 = new Hashtable( );
-        htblColNameValue2.put("id", new Integer( 20 ));
-        htblColNameValue2.put("name", new String("nairuzy" ) );
-        htblColNameValue2.put("gpa", new Double( 4.0) );
+        
+        Hashtable<String,Object> htblColNameValue2 = new Hashtable<>();
+        htblColNameValue2.put("id", 20);
+        htblColNameValue2.put("name", "nairuzy");
+        htblColNameValue2.put("gpa", 4.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
         
-        Hashtable htblColNameValue4 = new Hashtable( );
-        htblColNameValue4.put("id", new Integer( 18));
-        htblColNameValue4.put("name", new String("marwa" ) );
-        htblColNameValue4.put("gpa", new Double( 3.0) );
+        Hashtable<String,Object> htblColNameValue4 = new Hashtable<>();
+        htblColNameValue4.put("id", 18);
+        htblColNameValue4.put("name", "marwa");
+        htblColNameValue4.put("gpa", 3.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue4 );
-        Hashtable htblColNameValue5 = new Hashtable( );
-        htblColNameValue5.put("id", new Integer( 17));
-        htblColNameValue5.put("name", new String("sarah" ) );
-        htblColNameValue5.put("gpa", new Double( 3.0) );
+        
+        Hashtable<String,Object> htblColNameValue5 = new Hashtable<>( );
+        htblColNameValue5.put("id", 17);
+        htblColNameValue5.put("name", "sarah");
+        htblColNameValue5.put("gpa", 3.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue5 );
-        Hashtable htblColNameValue6 = new Hashtable( );
-        htblColNameValue6.put("id", new Integer( 16));
-        htblColNameValue6.put("name", new String("sarah" ) );
-        htblColNameValue6.put("gpa", new Double( 2.6) );
+        
+        Hashtable<String,Object> htblColNameValue6 = new Hashtable<>( );
+        htblColNameValue6.put("id", 16);
+        htblColNameValue6.put("name", "sarah");
+        htblColNameValue6.put("gpa", 2.6);
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
-        Hashtable htblColNameValue3 = new Hashtable( );
-        htblColNameValue3.put("id", new Integer( 26));
-        htblColNameValue3.put("name", new String("frfr" ) );
-        htblColNameValue3.put("gpa", new Double( 2.6) );
+        
+        Hashtable<String,Object> htblColNameValue3 = new Hashtable<>( );
+        htblColNameValue3.put("id", 26);
+        htblColNameValue3.put("name", "frfr");
+        htblColNameValue3.put("gpa", 2.6);
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
+        
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
 //        Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+1+"Octree.ser");
@@ -83,7 +90,7 @@ public class DBApp {
 //
 //        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
         
-//        Hashtable toUpdate = new Hashtable();
+//        Hashtable<String,Object> toUpdate = new Hashtable<>();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
@@ -97,8 +104,7 @@ public class DBApp {
 //        }
         
     }
-
-
+    
 //    private static void printOctree(Octree octree){
 //        if(octree.isLeaf()) {
 //            for (Point p : octree.getPoints()) {
@@ -114,8 +120,9 @@ public class DBApp {
 //            }
 //        }
 //    }
+    
     public void init() {
-        FileWriter writer = null;
+        FileWriter writer;
         try {
             writer = new FileWriter( "src/Resources/metadata.csv", true );
             StringBuilder sb = new StringBuilder();
@@ -131,7 +138,7 @@ public class DBApp {
 
     public void createTable(String strTableName, String strClusteringKeyColumn, Hashtable<String,String> htblColNameType,
                             Hashtable<String,String> htblColNameMin, Hashtable<String,String> htblColNameMax ) throws DBAppException {
-        BufferedReader br = null;
+        BufferedReader br;
         strTableName = strTableName.toLowerCase();
         try {
             br = new BufferedReader(new FileReader("src/Resources/metadata.csv"));
@@ -154,15 +161,15 @@ public class DBApp {
                 String type = htblColNameType.get(colName).toLowerCase();
                 String min = htblColNameMin.get(colName).toLowerCase();
                 String max = htblColNameMax.get(colName).toLowerCase();
-                boolean clusteringKey = colName==strClusteringKeyColumn;
-                sb.append(strTableName+", ");
-                sb.append(colName+", ");
-                sb.append(type+", ");
-                sb.append(clusteringKey+", ");
-                sb.append("null"+", ");
-                sb.append("null"+", ");
-                sb.append(min+", ");
-                sb.append(max+ "\n");
+                boolean clusteringKey = colName.equals(strClusteringKeyColumn);
+                sb.append(strTableName).append(", ");
+                sb.append(colName).append(", ");
+                sb.append(type).append(", ");
+                sb.append(clusteringKey).append(", ");
+                sb.append("null, ");
+                sb.append("null, ");
+                sb.append(min).append(", ");
+                sb.append(max).append("\n");
                 writer.append(sb);
             }
             writer.flush();
@@ -182,29 +189,25 @@ public class DBApp {
             if(!(htblColNameMin.containsKey(colName) && htblColNameMax.containsKey(colName)))
                 return false;
             String type = htblColNameType.get(colName);
-            if(!(type.toLowerCase().equals("java.lang.integer") || type.toLowerCase().equals("java.lang.string") || type.toLowerCase().equals("java.lang.double") || type.toLowerCase().equals("java.lang.date")))
+            if(!(type.equalsIgnoreCase("java.lang.integer") || type.equalsIgnoreCase("java.lang.string") || type.equalsIgnoreCase("java.lang.double") || type.equalsIgnoreCase("java.lang.date")))
                 return false;
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
-            if(type.toLowerCase().equals("java.lang.integer")){
+            if(type.equalsIgnoreCase("java.lang.integer")){
                 try{
                     Integer.parseInt(min);
                     Integer.parseInt(max);
-                } catch(NumberFormatException e) {
-                    return false;
-                } catch(NullPointerException e) {
+                } catch(NumberFormatException | NullPointerException e) {
                     return false;
                 }
-            } else if(type.toLowerCase().equals("java.lang.double")){
+            } else if(type.equalsIgnoreCase("java.lang.double")){
                 try {
                     Double.parseDouble(min);
                     Double.parseDouble(max);
-                } catch(NumberFormatException e) {
-                    return false;
-                } catch(NullPointerException e) {
+                } catch(NumberFormatException | NullPointerException e) {
                     return false;
                 }
-            } else if(type.toLowerCase().equals("java.lang.date")){
+            } else if(type.equalsIgnoreCase("java.lang.date")){
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     formatter.parse(min);
@@ -216,8 +219,7 @@ public class DBApp {
         }
         return true;
     }
-
-
+    
     public void insertIntoTable(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
    // checkIfContainsAllColumns(strTable)
             strTableName = strTableName.toLowerCase();
@@ -227,7 +229,6 @@ public class DBApp {
             Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
             String primaryKey = table.getStrClusteringKeyColumn();
             Comparable value = (Comparable) htblColNameValue.get(primaryKey);
-
             Tuple newtuple = new Tuple(htblColNameValue, value);
             if (table.getPaths().isEmpty()) {
                 String Path=createPage(table, newtuple);
@@ -278,13 +279,13 @@ public class DBApp {
                     Octree tree=(Octree) deserializeObject(octreePath);
                     tree.updatePath((Comparable) t.getValues().get(tree.getColumns()[0]),(Comparable) t.getValues().get(tree.getColumns()[1]),(Comparable)t.getValues().get(tree.getColumns()[2]),t.getPrimaryKey(),path);
                     serializeObject(tree,octreePath);
-                }}
+                }
+            }
         }
     }
     
     public void insertIntoIndex(Table table,Hashtable<String,Object> htblColNameValue,String path,Object clustringkey) throws DBAppException {
         HashSet<String> hs=new HashSet<>();
-
         for (String key:htblColNameValue.keySet()){
            String octreePath=table.getOctreePaths().get(key);
             if (octreePath!=null){
@@ -297,8 +298,7 @@ public class DBApp {
         }
 
     }
-
-
+    
     public String createPage(Table table, Tuple newtuple) throws DBAppException{
         Page page = new Page("src/Resources/"+table.getStrTableName()+table.getPageCounter()+".ser");
         table.setPageCounter(table.getPageCounter()+1);
@@ -324,7 +324,7 @@ public class DBApp {
 
     }
     
-    public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
+    public int findIndex(Vector<Tuple> tuples, Comparable value) {
         int low = 0;
         int high = tuples.size()-1;
         int mid=0;
@@ -345,7 +345,7 @@ public class DBApp {
     public int getNewIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
         int low = 0;
         int high = tuples.size()-1;
-        int mid=0;
+        int mid;
         while(low<=high){
             mid = ((high-low)/2) + low;
             Comparable tupleVal = (Comparable)tuples.get(mid).getPrimaryKey();
@@ -394,13 +394,12 @@ public class DBApp {
                          } else if (colType.equals("java.lang.double")) {
                              clusteringKeyValue = Double.parseDouble(strClusteringKeyValue);
                          }
-                         if (table.getOctreePaths().get(primaryKeyName)!=null){
+                         if (table.getOctreePaths().get(primaryKeyName)!=null){ //use index
                              Octree octree = (Octree) deserializeObject(table.getOctreePaths().get(primaryKeyName));
                              serializeObject(table,"src/Resources/" + strTableName + ".ser");
-                             updateUsingIndex(octree,clusteringKeyValue,htblColNameValue,table);
+                             updateUsingIndex(clusteringKeyValue,htblColNameValue,table);
                              return;
                          }
-                         
                          int indexInPage = -1;
                          for (String pathName : table.getPaths()) {
                              Page page = (Page) deserializeObject(pathName);
@@ -436,14 +435,12 @@ public class DBApp {
              }
              serializeObject(table, "src/Resources/" + strTableName + ".ser");
              throw new DBAppException("Cannot update");
-         }catch(IOException e){
-             throw new DBAppException(e);
-         }catch(ParseException e){
+         }catch(IOException | ParseException e){
              throw new DBAppException(e);
          }
-     }
+    }
     
-    private void updateUsingIndex(Octree octree, Object clusteringKeyValue, Hashtable<String, Object> htblColNameValue,Table table) throws DBAppException{
+    private void updateUsingIndex(Object clusteringKeyValue, Hashtable<String, Object> htblColNameValue,Table table) throws DBAppException{
         Hashtable <String, Object> toDelete = new Hashtable<>();
         toDelete.put(table.getStrClusteringKeyColumn(),clusteringKeyValue);
         ArrayList <Tuple> res = deleteUsingIndex(table.strTableName,toDelete);
@@ -509,10 +506,8 @@ public class DBApp {
         
     }
     
-    
     public void deleteFromTable2(String strTableName,
                                 Hashtable<String,Object> htblColNameValue) throws DBAppException {
-
             Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
             String primaryKeyName = table.getStrClusteringKeyColumn();
             Object primaryKey = htblColNameValue.get(primaryKeyName);
@@ -554,7 +549,6 @@ public class DBApp {
             }
             serializeObject(table, "src/Resources/" + strTableName + ".ser");
             throw new DBAppException("Tuple Not found");
-
     }
     
     public ArrayList<Tuple> deleteUsingIndex(String strTableName, Hashtable<String,Object> htblColNameValue) throws DBAppException {
@@ -563,7 +557,7 @@ public class DBApp {
         ArrayList<Tuple> oldValues = new ArrayList<>();
         //object is vector of points
         for(Object key: mayDelete.keySet()){
-            Vector<Point> points = (Vector<Point>) key; //duplicates
+            Vector<Point> points = (Vector<Point>) key;
             String path = mayDelete.get(key);
             Octree octree = (Octree) deserializeObject(path);
             for(int i =0; i<points.size(); i++){
@@ -603,7 +597,6 @@ public class DBApp {
         return oldValues;
     }
     
-    
     public Hashtable<Object, String> findUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Hashtable<Object, String> result= new Hashtable<>();
         HashSet<String> octrees = new HashSet<>();
@@ -622,27 +615,24 @@ public class DBApp {
                 y = (Comparable) htblColNameValue.get(octree.getColumns()[1]);
             if(htblColNameValue.containsKey(octree.getColumns()[2]))
                 z = (Comparable) htblColNameValue.get(octree.getColumns()[2]);
-            Vector<Point> recResult = recGetPos(octree, x, y, z, htblColNameValue);
+            Vector<Point> recResult = recGetPos(octree, x, y, z);
             if(!recResult.isEmpty()){
                 result.put(recResult, path);
             }
         }
         return result;
     }
-    public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z, Hashtable<String,Object> htblColNameValue){
+    public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z){
         if(octree.isLeaf()) {
-            Vector<Point> toDelete = new Vector<>();
-            //                    octree.getPoints().remove(point);
-            toDelete.addAll(octree.getPoints());
-            return toDelete;
+            return new Vector<>(octree.getPoints());
         }
         Comparable midx = octree.getMid(octree.getTopLeftFront().getX(), octree.getBottomRightBack().getX()); //gets median of every dimension
         Comparable midy = octree.getMid(octree.getTopLeftFront().getY(), octree.getBottomRightBack().getY());
         Comparable midz = octree.getMid(octree.getTopLeftFront().getZ(), octree.getBottomRightBack().getZ());
         HashSet<Integer> pos = getPos(x, y, z, midx, midy, midz);
-        Vector<Point> res= new Vector<Point>();
+        Vector<Point> res= new Vector<>();
         for(Integer t: pos){
-            res.addAll(recGetPos(octree.getBbs()[t], x, y, z, htblColNameValue));
+            res.addAll(recGetPos(octree.getBbs()[t], x, y, z));
         }
         return res;
     }
@@ -679,7 +669,7 @@ public class DBApp {
         try {
             FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
             BufferedReader br = new BufferedReader(oldMetaDataFile);
-            String row = "";
+            String row;
             String[] arr;
             boolean foundTableName = false;
             int counterInsert = 0;
@@ -702,7 +692,6 @@ public class DBApp {
                     if (object == null) {
                         htblColNameValue.put(colName, new NullWrapper());
                         counterInsert++;
-                        continue;
                     } else if (colType.equals("java.lang.integer")) {
                         if (!(object instanceof java.lang.Integer)) {
                             return false;
@@ -820,9 +809,7 @@ public class DBApp {
             }
             if (!(counterUpdate == htblColNameValue.size())) throw new DBAppException("columns not found");
             return foundTableName;
-        }catch(IOException e){
-            throw new DBAppException(e);
-        }catch(ParseException e){
+        }catch(IOException | ParseException e){
             throw new DBAppException(e);
         }
     }
@@ -866,7 +853,6 @@ public class DBApp {
     public HashSet<Tuple> getSelectedTuples(SQLTerm sqlTerm) throws DBAppException {
         HashSet<Tuple> tuples = new HashSet<>();
         Table table = (Table) deserializeObject("src/resources/" + sqlTerm._strTableName + ".ser");
-
         for(String path : table.getPaths()){
             Page page = (Page) deserializeObject(path);
             for(Tuple tuple : page.getTuplesInPage()){
@@ -888,25 +874,13 @@ public class DBApp {
         Object objValue = sqlTerm._objValue;
         switch(sqlTerm._strOperator){
             case ">":
-                if(((Comparable)value).compareTo(objValue)>0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) > 0;
             case ">=":
-                if(((Comparable)value).compareTo(objValue)>=0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) >= 0;
             case "<":
-                if(((Comparable)value).compareTo(objValue)<0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) < 0;
             case "<=":
-                if(((Comparable)value).compareTo(objValue)<=0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) <= 0;
             case "!=":
                 if(value instanceof NullWrapper && objValue == null){
                     return false;
@@ -914,10 +888,7 @@ public class DBApp {
                 if(value instanceof NullWrapper || objValue == null){
                     return true;
                 }
-                if(((Comparable)value).compareTo(objValue)!=0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) != 0;
             default:
                 if(value instanceof NullWrapper && objValue == null){
                     return true;
@@ -925,10 +896,7 @@ public class DBApp {
                 if(value instanceof NullWrapper || objValue == null){
                     return false;
                 }
-                if(((Comparable)value).compareTo(objValue)==0){
-                    return true;
-                }
-                return false;
+                return ((Comparable) value).compareTo(objValue) == 0;
         }
     }
     
@@ -943,7 +911,7 @@ public class DBApp {
                 throw new DBAppException("table names not consistent");
             }
         }
-        BufferedReader br = null;
+        BufferedReader br;
         try {
             br = new BufferedReader(new FileReader("src/Resources/metadata.csv"));
             String line;
@@ -998,7 +966,7 @@ public class DBApp {
                     throw new DBAppException("Type incorrect");
                 }
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                Date minDate = null;
+                Date minDate;
                 try {
                     minDate = formatter.parse(min);
                     Date maxDate = formatter.parse(max);
@@ -1019,14 +987,12 @@ public class DBApp {
                 }
             }
             for(String operator : strarrOperators){
-                if(!(operator.toLowerCase().equals("and") || operator.toLowerCase().equals("or") || operator.toLowerCase().equals("xor") )){
+                if(!(operator.equalsIgnoreCase("and") || operator.equalsIgnoreCase("or") || operator.equalsIgnoreCase("xor") )){
                     throw new DBAppException("Invalid Operator");
                 }
             }
         }
-        
         serializeObject(table , "src/resources/" + tableName + ".ser");
-        
     }
     
     
@@ -1038,9 +1004,7 @@ public class DBApp {
             objectIn.close();
             fileIn.close();
             return o;
-        }catch(IOException e){
-            throw new DBAppException(e);
-        }catch(ClassNotFoundException e){
+        }catch(IOException | ClassNotFoundException e){
             throw new DBAppException(e);
         }
     }
@@ -1064,7 +1028,7 @@ public class DBApp {
         try {
             FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
             BufferedReader br = new BufferedReader(oldMetaDataFile);
-            String row = "";
+            String row;
             String[] arr;
             boolean foundTableName = false;
             strTableName = strTableName.toLowerCase();
@@ -1108,68 +1072,61 @@ public class DBApp {
             serializeObject(page, page.getPath());
         }
         String oPath = "src/Resources/" + strTableName + table.getOctreePaths().size()+"Octree.ser";
-        for(int i=0; i<strarrColName.length; i++)
-            table.getOctreePaths().put(strarrColName[i], oPath);
+        for (String s : strarrColName){
+            table.getOctreePaths().put(s, oPath);
+        }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(octree,oPath);
     }
 
-
-
     public void updateMetaFile(String tableName, String[] indexColumns) throws IOException {
-
         FileReader oldMetaDataFile = new FileReader("src/resources/metadata.csv");
         BufferedReader br = new BufferedReader(oldMetaDataFile);
-
         StringBuilder newMetaData = new StringBuilder();
-        String curLine = "";
-
+        String curLine;
         StringBuilder indexName=new StringBuilder();
-        for (String s:indexColumns){indexName.append(s);} //just creating the indexName by appending all colNames
+        for (String s:indexColumns){
+            indexName.append(s);//just creating the indexName by appending all colNames
+        }
         while ((curLine = br.readLine()) != null) {
             String[] curLineSplit = curLine.split(",");
-
             if (!curLineSplit[0].equals(tableName)) {
                 newMetaData.append(curLine);
                 newMetaData.append("\n");
                 continue;
             }
             StringBuilder tmp = new StringBuilder(curLine);
-
             for (String col : indexColumns) {
                 if (col.equals(curLineSplit[1])) {
                     tmp = new StringBuilder();
                     for (int i = 0; i < curLineSplit.length; i++)
-                        if(i==4){tmp.append(indexName+", ");}
+                        if(i==4){
+                            tmp.append(indexName).append(", ");}
                         else if(i==5){tmp.append("Octree, ");}
                         else if (i == 7)
                             tmp.append(curLineSplit[i]);
                         else
-                            tmp.append(curLineSplit[i] + ",");
+                            tmp.append(curLineSplit[i]).append(",");
                 }
             }
-            newMetaData.append(tmp + "\n");
+            newMetaData.append(tmp).append("\n");
         }
-
         FileWriter metaDataFile = new FileWriter("src/resources/metadata.csv");
         metaDataFile.write(newMetaData.toString());
         metaDataFile.close();
-
     }
 
-
-
     private Comparable set(String type, String value) throws DBAppException {
-        if (type.toLowerCase().equals("java.lang.integer"))
+        if (type.equalsIgnoreCase("java.lang.integer"))
             return Integer.parseInt(value);
-        else if (type.toLowerCase().equals("java.util.date")) {
+        else if (type.equalsIgnoreCase("java.util.date")) {
             try {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 return formatter.parse(value);
             } catch (ParseException e) {
                 throw new DBAppException(e);
             }
-        } else if (type.toLowerCase().equals("java.lang.double"))
+        } else if (type.equalsIgnoreCase("java.lang.double"))
             return Double.parseDouble(value);
         return value;
     }
