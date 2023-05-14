@@ -7,7 +7,7 @@ import java.util.Hashtable;
 
 public class Point implements Serializable {
 
-private Comparable x,y,z;
+    private Comparable x,y,z;
 //max/min?
 //Tuple reference;
     private Hashtable<Object,String> reference= new Hashtable<>(); //clustering key and ???? path

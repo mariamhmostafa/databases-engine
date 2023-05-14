@@ -324,7 +324,7 @@ public class DBApp {
 
     }
     
-    public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException { //NOT WORKING
+    public int findIndex(Vector<Tuple> tuples, Comparable value) throws DBAppException {
         int low = 0;
         int high = tuples.size()-1;
         int mid=0;
@@ -541,30 +541,54 @@ public class DBApp {
 
     }
     
-    public void deleteUsingIndex(String strTableName,Hashtable<String,Object> htblColNameValue) throws DBAppException {
+    public ArrayList<Tuple> deleteUsingIndex(String strTableName, Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
-        Hashtable<Object, String> toDelete = findAndDeleteUsingIndex(table, htblColNameValue);
+        Hashtable<Object, String> mayDelete = findUsingIndex(table, htblColNameValue);
+        ArrayList<Tuple> oldValues = new ArrayList<>();
         //object is vector of points
-        for(Object key: toDelete.keySet()){
-            Vector<Point> points = (Vector<Point>) key;
-            String path = toDelete.get(key);
+        for(Object key: mayDelete.keySet()){
+            Vector<Point> points = (Vector<Point>) key; //duplicates
+            String path = mayDelete.get(key);
             Octree octree = (Octree) deserializeObject(path);
-            for(Point point: points){
+            for(int i =0; i<points.size(); i++){
+                Point point = points.get(i);
                 Hashtable<Object,String> references= point.getReference();
+                ArrayList<Object> toDelete = new ArrayList<>();
                 for(Object clusteringKey: references.keySet()){
                     String pagePath = references.get(clusteringKey);
                     Page page = (Page) deserializeObject(pagePath);
-                    page.getTuplesInPage().removeIf(tuple -> tuple.getPrimaryKey().equals(clusteringKey));
+                    int index = findIndex(page.getTuplesInPage(), (Comparable) clusteringKey);
+                    Tuple tuple = page.getTuplesInPage().get(index);
+                    boolean willDelete = true;
+                    for(String colName: htblColNameValue.keySet()){
+                        if(!htblColNameValue.get(colName.toLowerCase()).equals(tuple.getValues().get(colName.toLowerCase()))){
+                            willDelete = false;
+                            break;
+                        }
+                    }
+                    if(willDelete){
+                        oldValues.add(tuple);
+                        page.getTuplesInPage().remove(tuple);
+                        toDelete.add(clusteringKey);
+                    }
                     serializeObject(page, pagePath);
+                }
+                for(Object k : toDelete){
+                    references.remove(k);
+                }
+                if(references.isEmpty()){
+                    octree.getPoints().remove(point);
+                    i--;
                 }
             }
             serializeObject(octree, path);
         }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        return oldValues;
     }
     
     
-    public Hashtable<Object, String> findAndDeleteUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
+    public Hashtable<Object, String> findUsingIndex(Table table , Hashtable<String,Object> htblColNameValue) throws DBAppException {
         Hashtable<Object, String> result= new Hashtable<>();
         HashSet<String> octrees = new HashSet<>();
         for(String key: htblColNameValue.keySet()){
@@ -582,24 +606,18 @@ public class DBApp {
                 y = (Comparable) htblColNameValue.get(octree.getColumns()[1]);
             if(htblColNameValue.containsKey(octree.getColumns()[2]))
                 z = (Comparable) htblColNameValue.get(octree.getColumns()[2]);
-            Vector<Point> recResult = recGetPos(octree, x, y, z);
+            Vector<Point> recResult = recGetPos(octree, x, y, z, htblColNameValue);
             if(!recResult.isEmpty()){
                 result.put(recResult, path);
             }
         }
         return result;
     }
-    public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z){
+    public static Vector<Point> recGetPos(Octree octree,Comparable x, Comparable y, Comparable z, Hashtable<String,Object> htblColNameValue){
         if(octree.isLeaf()) {
             Vector<Point> toDelete = new Vector<>();
-            for(Point point: octree.getPoints()){
-                if( (x==null || point.getX().equals(x)) &&
-                        (y==null || point.getY().equals(y)) &&
-                        (z==null || point.getZ().equals(z)) ){
-                    toDelete.add(point);
-                    octree.getPoints().remove(point);
-                }
-            }
+            //                    octree.getPoints().remove(point);
+            toDelete.addAll(octree.getPoints());
             return toDelete;
         }
         Comparable midx = octree.getMid(octree.getTopLeftFront().getX(), octree.getBottomRightBack().getX()); //gets median of every dimension
@@ -608,7 +626,7 @@ public class DBApp {
         HashSet<Integer> pos = getPos(x, y, z, midx, midy, midz);
         Vector<Point> res= new Vector<Point>();
         for(Integer t: pos){
-            res.addAll(recGetPos(octree.getBbs()[t], x, y, z));
+            res.addAll(recGetPos(octree.getBbs()[t], x, y, z, htblColNameValue));
         }
         return res;
     }
