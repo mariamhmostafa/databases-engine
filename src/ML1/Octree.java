@@ -324,7 +324,7 @@ public class Octree implements Serializable {
 
     }
 
-    public Hashtable<Object, String> select(SQLTerm[] sqlTerm,int[] arr) {//we should enter the columns in the correct order of the octree columns
+    public void select(SQLTerm[] sqlTerm,int[] arr,Hashtable<Object,String>res) {//we should enter the columns in the correct order of the octree columns
        System.out.println("SELECT INDEX");
 
         Object valuex = sqlTerm[arr[1]]._objValue;
@@ -337,17 +337,17 @@ public class Octree implements Serializable {
         ArrayList<Integer>xchildren=new ArrayList<>();
         ArrayList<Integer>ychildren=new ArrayList<>();
         ArrayList<Integer>zchildren=new ArrayList<>();
-        Hashtable<Object,String> res=new Hashtable<>();
             if(!isLeaf) {
                 switch (sqlTerm[arr[1]]._strOperator) {
                     case ">":
+                        System.out.println("x I entered case >");
                         if (compareTo((Comparable) valuex, midx) > 0) {
                             xchildren.add(4);
                             xchildren.add(5);
                             xchildren.add(6);
                             xchildren.add(7);
                         }
-                        else{
+                        else {//if = call get pos?
                             xchildren.add(0);
                             xchildren.add(1);
                             xchildren.add(2);
@@ -359,6 +359,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
+                        System.out.println("x I entered case >=");
                         xchildren.add(0);
                         xchildren.add(1);
                         xchildren.add(2);
@@ -369,6 +370,7 @@ public class Octree implements Serializable {
                         xchildren.add(7);
                         break;
                     case "<":
+                        System.out.println("x I entered case <");
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -385,6 +387,7 @@ public class Octree implements Serializable {
                             xchildren.add(7);
                         }
                     case "<=":
+                        System.out.println("x I entered case <=");
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -402,6 +405,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
+                        System.out.println("x I entered case !=");
                         xchildren.add(0);
                         xchildren.add(1);
                         xchildren.add(2);
@@ -412,6 +416,7 @@ public class Octree implements Serializable {
                         xchildren.add(7);
                         break;
                     default:
+                        System.out.println("x I entered case =");
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -428,9 +433,10 @@ public class Octree implements Serializable {
                 }
                 switch (sqlTerm[arr[2]]._strOperator) {
                     case ">":
+                        System.out.println("y I entered case >");
                         if (compareTo((Comparable) valuey, midy) > 0) {
-                            ychildren.add(4);
-                            ychildren.add(5);
+                            ychildren.add(2);
+                            ychildren.add(3);
                             ychildren.add(6);
                             ychildren.add(7);
                         }
@@ -446,21 +452,31 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
-                        ychildren.add(0);
-                        ychildren.add(1);
-                        ychildren.add(2);
-                        ychildren.add(3);
-                        ychildren.add(4);
-                        ychildren.add(5);
-                        ychildren.add(6);
-                        ychildren.add(7);
+                        System.out.println("y I entered case >=");
+                       if( compareTo((Comparable) valuey, midy) > 0) {
+                           ychildren.add(2);
+                           ychildren.add(3);
+                           ychildren.add(6);
+                           ychildren.add(7);
+                       }
+                       else {
+                           ychildren.add(0);
+                           ychildren.add(1);
+                           ychildren.add(2);
+                           ychildren.add(3);
+                           ychildren.add(4);
+                           ychildren.add(5);
+                           ychildren.add(6);
+                           ychildren.add(7);
+                       }
                         break;
                     case "<":
+                        System.out.println("y I entered case <");
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
-                            ychildren.add(2);
-                            ychildren.add(3);
+                            ychildren.add(4);
+                            ychildren.add(5);
                         }else{
                             ychildren.add(0);
                             ychildren.add(1);
@@ -472,11 +488,12 @@ public class Octree implements Serializable {
                             ychildren.add(7);
                         }
                     case "<=":
+                        System.out.println("y I entered case <=");
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
-                            ychildren.add(2);
-                            ychildren.add(3);
+                            ychildren.add(4);
+                            ychildren.add(5);
                         }else{
                             ychildren.add(0);
                             ychildren.add(1);
@@ -489,6 +506,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
+                        System.out.println("y I entered case !=");
                         ychildren.add(0);
                         ychildren.add(1);
                         ychildren.add(2);
@@ -499,14 +517,15 @@ public class Octree implements Serializable {
                         ychildren.add(7);
                         break;
                     default:
+                        System.out.println("y I entered case =");
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
-                            ychildren.add(2);
-                            ychildren.add(3);
-                        }else{
                             ychildren.add(4);
                             ychildren.add(5);
+                        }else{
+                            ychildren.add(2);
+                            ychildren.add(3);
                             ychildren.add(6);
                             ychildren.add(7);
                         }
@@ -515,10 +534,11 @@ public class Octree implements Serializable {
                 }
                 switch (sqlTerm[arr[3]]._strOperator) {
                     case ">":
+                        System.out.println("z I entered case >");
                         if (compareTo((Comparable) valuez, midz) > 0) {
-                            zchildren.add(4);
+                            zchildren.add(1);
+                            zchildren.add(3);
                             zchildren.add(5);
-                            zchildren.add(6);
                             zchildren.add(7);
                         }
                         else{
@@ -533,21 +553,31 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
-                        zchildren.add(0);
-                        zchildren.add(1);
-                        zchildren.add(2);
-                        zchildren.add(3);
-                        zchildren.add(4);
-                        zchildren.add(5);
-                        zchildren.add(6);
-                        zchildren.add(7);
-                        break;
-                    case "<":
-                        if (compareTo((Comparable) valuez, midz) <= 0) {
+                        System.out.println("z I entered case >=");
+                        if (compareTo((Comparable) valuez, midz) > 0) {
+                            zchildren.add(1);
+                            zchildren.add(3);
+                            zchildren.add(5);
+                            zchildren.add(7);
+                        }
+                        else{
                             zchildren.add(0);
                             zchildren.add(1);
                             zchildren.add(2);
                             zchildren.add(3);
+                            zchildren.add(4);
+                            zchildren.add(5);
+                            zchildren.add(6);
+                            zchildren.add(7);
+                        }
+                        break;
+                    case "<":
+                        System.out.println("z I entered case <");
+                        if (compareTo((Comparable) valuez, midz) <= 0) {
+                            zchildren.add(0);
+                            zchildren.add(2);
+                            zchildren.add(4);
+                            zchildren.add(6);
                         }else{
                             zchildren.add(0);
                             zchildren.add(1);
@@ -559,11 +589,12 @@ public class Octree implements Serializable {
                             zchildren.add(7);
                         }
                     case "<=":
+                        System.out.println("z I entered case <=");
                         if (compareTo((Comparable) valuez, midz) <= 0) {
                             zchildren.add(0);
-                            zchildren.add(1);
                             zchildren.add(2);
-                            zchildren.add(3);
+                            zchildren.add(4);
+                            zchildren.add(6);
                         }else{
                             zchildren.add(0);
                             zchildren.add(1);
@@ -576,6 +607,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
+                        System.out.println("z I entered case !=");
                         zchildren.add(0);
                         zchildren.add(1);
                         zchildren.add(2);
@@ -586,144 +618,44 @@ public class Octree implements Serializable {
                         zchildren.add(7);
                         break;
                     default:
+                        System.out.println("z I entered case =");
                         if (compareTo((Comparable) valuez, midz) <= 0) {
                             zchildren.add(0);
-                            zchildren.add(1);
                             zchildren.add(2);
-                            zchildren.add(3);
-                        }else{
                             zchildren.add(4);
-                            zchildren.add(5);
                             zchildren.add(6);
+                        }else{
+                            zchildren.add(1);
+                            zchildren.add(3);
+                            zchildren.add(5);
                             zchildren.add(7);
                         }
 
 
                 }
                 for(int i:xchildren){
-                    for(int j:ychildren){
-                        if(i==j) {
-                            for (int k : zchildren) {
-                                if(j==k){
-                                    bbs[i].select(sqlTerm,arr);
-                                }
-                            }
-                        }
+                    if(ychildren.contains(i)&&zchildren.contains(i)){
+                        bbs[i].select(sqlTerm, arr,res);
                     }
                 }
             }else{
+                System.out.println("I am a leaf");
                 for(Point p:points){
                     if(isSelected(p.getX(),sqlTerm[arr[1]]._objValue, sqlTerm[arr[1]]._strOperator)&&
                             isSelected(p.getY(),sqlTerm[arr[2]]._objValue, sqlTerm[arr[2]]._strOperator)&&
                             isSelected(p.getZ(),sqlTerm[arr[3]]._objValue, sqlTerm[arr[3]]._strOperator)){
+                        System.out.println("yes I am a result");
                         for(Object ref:p.getReference().keySet()){
                             res.put(ref,p.getReference().get(ref));
+                            System.out.println(res.toString());
                         }
                     }
                 }
             }
-        return res;
-    }
-    public ArrayList<Integer> selectOnOneColumn(SQLTerm term){
-        Object value=term._objValue;
-        ArrayList<Integer> res=new ArrayList<>();
-        Comparable mid;
-        if(term._strColumnName.equals(columns[0])){
-            mid=getMid(topLeftFront.getX(), bottomRightBack.getX());
-        }else if(term._strColumnName.equals(columns[1])){
-            mid=getMid(topLeftFront.getY(), bottomRightBack.getY());
-        }else{
-            mid=getMid(topLeftFront.getZ(), bottomRightBack.getZ());
-        }
-        switch (term._strOperator) {
-            case ">":
-                if (compareTo((Comparable) value, mid) > 0) {
-                    res.add(4);
-                    res.add(5);
-                    res.add(6);
-                    res.add(7);
-                }
-                else{
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                    res.add(4);
-                    res.add(5);
-                    res.add(6);
-                    res.add(7);
-                }
-                break;
-            case ">="://no matter the value compared to mid always have to search in them all
-                res.add(0);
-                res.add(1);
-                res.add(2);
-                res.add(3);
-                res.add(4);
-                res.add(5);
-                res.add(6);
-                res.add(7);
-                break;
-            case "<":
-                if (compareTo((Comparable) value, mid) <= 0) {
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                }else{
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                    res.add(4);
-                    res.add(5);
-                    res.add(6);
-                    res.add(7);
-                }
-            case "<=":
-                if (compareTo((Comparable) value, mid) <= 0) {
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                }else{
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                    res.add(4);
-                    res.add(5);
-                    res.add(6);
-                    res.add(7);
-                }
-                break;
-            case "!=":
-                res.add(0);
-                res.add(1);
-                res.add(2);
-                res.add(3);
-                res.add(4);
-                res.add(5);
-                res.add(6);
-                res.add(7);
-                break;
-            default:
-                if (compareTo((Comparable) value, mid) <= 0) {
-                    res.add(0);
-                    res.add(1);
-                    res.add(2);
-                    res.add(3);
-                }else{
-                    res.add(4);
-                    res.add(5);
-                    res.add(6);
-                    res.add(7);
-                }
+        System.out.println(res.toString());
 
-
-        }
-        return res;
     }
+
     public boolean isSelected(Object value,Object objValue,String operator){
         switch(operator){
             case ">":

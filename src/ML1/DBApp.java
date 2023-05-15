@@ -752,16 +752,19 @@ public class DBApp {
         Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
         Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
         HashSet<Tuple> tuples = new HashSet<>();
-        Hashtable<Object,String> res=tree.select(arrSQLTerms,arr);
+        Hashtable<Object,String> res=new Hashtable<>();
+        tree.select(arrSQLTerms,arr,res);
+        System.out.println(res.toString());
         for(Object primaryKey:res.keySet()){
             Page page = (Page) deserializeObject(res.get(primaryKey));
             for(Tuple tuple:page.getTuplesInPage()){
-                if(((Comparable)tuple.getPrimaryKey()).compareTo((Comparable)primaryKey)==0){
+                if(((Comparable)tuple.getPrimaryKey()).compareTo(primaryKey)==0){
                     tuples.add(tuple);
                 }
             }
             serializeObject(page,res.get(primaryKey));
         }
+        System.out.println(tuples.size());
         serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
         serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
          return tuples;
@@ -783,6 +786,8 @@ public class DBApp {
                arrOfArr.add(getSelectedTuples(arrSQLTerms[j]));
            }
             arrOfArr.add(selectUsingIndex(arrSQLTerms,arr));
+            strarrOperators[arr[0]]="null";
+            strarrOperators[arr[0]+1]="null";
             i=arr[0]+2;//to get the next unindexed sqlterms
         }
         while(i<arrSQLTerms.length){
@@ -793,6 +798,9 @@ public class DBApp {
 
         HashSet<Tuple> filtered = arrOfArr.get(0);
         for(int j=0; j<strarrOperators.length; j++){
+            if(strarrOperators[j].equals("null")){
+                continue;
+            }
             String operator = strarrOperators[j];
             switch(operator.toLowerCase()){
                 case "or":
