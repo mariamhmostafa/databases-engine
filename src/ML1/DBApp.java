@@ -88,13 +88,15 @@ public class DBApp {
         Hashtable<String, Object> htblUpdate = new Hashtable<>();
         htblUpdate.put("age", 16);
         dbApp.updateTable(strTableName,"19",htblUpdate );
-//        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
-//        for(String p: table.getPaths()){
-//            Page page = (Page) dbApp.deserializeObject(p);
-//            for(Tuple t: page.getTuplesInPage()){
-//                System.out.println(t.getPrimaryKey());
-//            }
-//        }
+        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
+        for(String p: table.getPaths()){
+            Page page = (Page) dbApp.deserializeObject(p);
+            for(Tuple t: page.getTuplesInPage()){
+                for(String s: t.getValues().keySet())
+                    System.out.print(s + " " + t.getValues().get(s));
+                System.out.println();
+            }
+        }
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
 //        Hashtable<Object, String> find = dbApp.findUsingIndex(table, htblDelete);
 //        for(Object key : find.keySet()){
@@ -431,11 +433,16 @@ public class DBApp {
                          } else if (colType.equals("java.lang.double")) {
                              clusteringKeyValue = Double.parseDouble(strClusteringKeyValue);
                          }
+                         if(table.getOctreePaths().get(primaryKeyName)!=null){
+                             serializeObject(table,"src/Resources/" + strTableName + ".ser");
+                             updateUsingIndex(clusteringKeyValue,htblColNameValue,table, table.getOctreePaths().get(primaryKeyName));
+                             return;
+                         }
                          for(String col : htblColNameValue.keySet() ){
-                             if (table.getOctreePaths().get(primaryKeyName)!=null || table.getOctreePaths().get(col)!=null){ //use index
+                             if (table.getOctreePaths().get(col)!=null){ //use index
                                  //Octree octree = (Octree) deserializeObject(table.getOctreePaths().get(primaryKeyName));
                                  serializeObject(table,"src/Resources/" + strTableName + ".ser");
-                                 updateUsingIndex(clusteringKeyValue,htblColNameValue,table);
+                                 updateUsingIndex(clusteringKeyValue,htblColNameValue,table, table.getOctreePaths().get(col));
                                  return;
                              }
                          }
@@ -479,10 +486,10 @@ public class DBApp {
          }
     }
     
-    private void updateUsingIndex(Object clusteringKeyValue, Hashtable<String, Object> htblColNameValue,Table table) throws DBAppException{
+    private void updateUsingIndex(Object clusteringKeyValue, Hashtable<String, Object> htblColNameValue,Table table, String path) throws DBAppException{
         Hashtable <String, Object> toDelete = new Hashtable<>();
         toDelete.put(table.getStrClusteringKeyColumn(),clusteringKeyValue);
-        ArrayList <Tuple> res = deleteUsingIndex(table,table.getOctreePaths().get(table.strClusteringKeyColumn), toDelete);
+        ArrayList <Tuple> res = deleteUsingIndex(table,path, toDelete);
         Tuple oldTuple = res.get(0);
         oldTuple.getValues().putAll(htblColNameValue);
         insertIntoTable(table.strTableName,oldTuple.getValues());
