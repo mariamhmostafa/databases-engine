@@ -1300,6 +1300,11 @@ public class DBApp {
         }
         serializeObject(table, "src/Resources/" + strTableName + ".ser");
         serializeObject(octree,oPath);
+        try {
+            updateMetaFile(strTableName,strarrColName);
+        } catch (IOException e) {
+            throw new DBAppException(e);
+        }
     }
 
     public void updateMetaFile(String tableName, String[] indexColumns) throws IOException {
