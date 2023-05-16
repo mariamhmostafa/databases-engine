@@ -75,7 +75,13 @@ public class DBApp {
         htblDelete.put("name", "sarah");
         htblDelete.put("gpa",2.6);
         dbApp.deleteFromTable(strTableName,htblDelete);
-//        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
+        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
+        for(String p: table.getPaths()){
+            Page page = (Page) dbApp.deserializeObject(p);
+            for(Tuple t: page.getTuplesInPage()){
+                System.out.println(t.getPrimaryKey());
+            }
+        }
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
 //        Hashtable<Object, String> find = dbApp.findUsingIndex(table, htblDelete);
 //        for(Object key : find.keySet()){
@@ -737,8 +743,8 @@ public class DBApp {
             else{pos.remove(0); pos.remove(1); pos.remove(4); pos.remove(5);}
         }
         if(z!=null){
-            if(z.compareTo(midz)<=0){pos.remove(0); pos.remove(2); pos.remove(4); pos.remove(6);}
-            else{pos.remove(1); pos.remove(3); pos.remove(5); pos.remove(7);}
+            if(z.compareTo(midz)<=0){pos.remove(1); pos.remove(3); pos.remove(5); pos.remove(7);}
+            else{pos.remove(0); pos.remove(2); pos.remove(4); pos.remove(6);}
         }
         return pos;
     }
