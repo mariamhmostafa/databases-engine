@@ -695,6 +695,11 @@ public class Octree implements Serializable {
     public static Hashtable<String, Integer> getHtblColumns() {
         return htblColumns;
     }
+    
+    public String[] getBbsPaths() {
+        return bbsPaths;
+    }
+    
     protected Object deserializeObject(String path) throws DBAppException {
         try {
             FileInputStream fileIn = new FileInputStream(path);
