@@ -9,68 +9,68 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DBApp {
-    
+
     public static void main(String[] args) throws DBAppException {
         DBApp dbApp = new DBApp();
         dbApp.init();
-        
+
         String strTableName = "student";
         Hashtable<String,String> htblColNameType = new Hashtable<>();
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
         htblColNameType.put("gpa", "java.lang.Double");
-        
+
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "a");
         colMin.put("gpa", "0.0");
-        
+
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "zzzzzzzzzzz");
         colMax.put("gpa","5.0");
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
-        
+
         //////inserting into table:
         Hashtable<String,Object> htblColNameValue1 = new Hashtable<>();
         htblColNameValue1.put("id", 19);
         htblColNameValue1.put("name", "mariam");
         htblColNameValue1.put("gpa", 0.87);
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
-        
+
         Hashtable<String,Object> htblColNameValue2 = new Hashtable<>();
         htblColNameValue2.put("id", 20);
         htblColNameValue2.put("name", "nairuzy");
         htblColNameValue2.put("gpa", 4.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
-        
+
         Hashtable<String,Object> htblColNameValue4 = new Hashtable<>();
         htblColNameValue4.put("id", 18);
         htblColNameValue4.put("name", "marwa");
         htblColNameValue4.put("gpa", 3.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue4 );
-        
+
         Hashtable<String,Object> htblColNameValue5 = new Hashtable<>( );
         htblColNameValue5.put("id", 17);
         htblColNameValue5.put("name", "sarah");
         htblColNameValue5.put("gpa", 3.0);
         dbApp.insertIntoTable( strTableName , htblColNameValue5 );
-        
+
         Hashtable<String,Object> htblColNameValue6 = new Hashtable<>( );
         htblColNameValue6.put("id", 16);
         htblColNameValue6.put("name", "sarah");
         htblColNameValue6.put("gpa", 2.6);
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
-        
+
         Hashtable<String,Object> htblColNameValue3 = new Hashtable<>( );
         htblColNameValue3.put("id", 26);
         htblColNameValue3.put("name", "frfr");
         htblColNameValue3.put("gpa", 2.6);
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
-        
+
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
-        
+
         Hashtable<String,Object> htblDelete = new Hashtable<>();
         htblDelete.put("name", "sarah");
         htblDelete.put("gpa",2.6);
@@ -110,12 +110,12 @@ public class DBApp {
 //        strarrOperators[1] = "and";
 ////
 //        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
-        
+
 //        Hashtable<String,Object> toUpdate = new Hashtable<>();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
-    
+
 //        while(resultSet.hasNext()) {
 //            Tuple t = (Tuple) resultSet.next();
 //            System.out.println();
@@ -123,7 +123,7 @@ public class DBApp {
 //                System.out.println(key + " value: " + t.getValues().get(key).toString());
 //            }
 //        }
-        
+
     }
 
     private static void printOctree(Octree octree){
@@ -207,7 +207,7 @@ public class DBApp {
             if(!(htblColNameMin.containsKey(colName) && htblColNameMax.containsKey(colName)))
                 return false;
             String type = htblColNameType.get(colName);
-            if(!(type.equalsIgnoreCase("java.lang.integer") || type.equalsIgnoreCase("java.lang.string") || type.equalsIgnoreCase("java.lang.double") || type.equalsIgnoreCase("java.lang.date")))
+            if(!(type.equalsIgnoreCase("java.lang.integer") || type.equalsIgnoreCase("java.lang.string") || type.equalsIgnoreCase("java.lang.double") || type.equalsIgnoreCase("java.util.date")))
                 return false;
             String min = htblColNameMin.get(colName);
             String max = htblColNameMax.get(colName);
@@ -225,7 +225,7 @@ public class DBApp {
                 } catch(NumberFormatException | NullPointerException e) {
                     return false;
                 }
-            } else if(type.equalsIgnoreCase("java.lang.date")){
+            } else if(type.equalsIgnoreCase("java.util.date")){
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     formatter.parse(min);
@@ -902,9 +902,9 @@ public class DBApp {
             throw new DBAppException(e);
         }
     }
-    
+
     public int[] shouldUseIndex(SQLTerm[] arrSQLTerms,int indx, String[] strarrOperators) throws DBAppException {
-        System.out.println("InShouldUseIndex");
+
         int[] arr=new int[4];
         Arrays.fill(arr,-1);
         if(arrSQLTerms.length<3)return arr;
@@ -920,42 +920,38 @@ public class DBApp {
 
                 for (int j=i;j<i+3;j++){
                     if (tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)!=null){
-                         if(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]==-1){
-                           if(j!=i+2){
-                               if(!strarrOperators[j].equalsIgnoreCase("AND")){
-                                break;
-                           }
-                        }
-                        arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]=j;
-                           //System.out.println(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]+" "+count);
-                        count++;
-                    }}
+                        if(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]==-1){
+                            if(j!=i+2){
+                                if(!strarrOperators[j].equalsIgnoreCase("AND")){
+                                    break;
+                                }
+                            }
+                            arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]=j;
+                            //System.out.println(arr[tree.getHtblColumns().get(arrSQLTerms[j]._strColumnName)+1]+" "+count);
+                            count++;
+                        }}
                     else {
                         break;
                     }
                 }
-                System.out.println(count);
+
                 if (count==3){
                     arr[0]=i;
                     break;
                 }
                 serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[i]._strColumnName));
             }
-            else {
-                System.out.println(table.getOctreePaths().toString());
-            }
+
         }
         serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
         return arr;
     }
-    public HashSet<Tuple> selectUsingIndex(SQLTerm[] arrSQLTerms, int[] arr) throws DBAppException {
-        System.out.println("InSelectUsingIndex");
-        Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
+    public HashSet<Tuple> selectUsingIndex(SQLTerm[] arrSQLTerms, int[] arr, Table table) throws DBAppException {
         Octree tree=(Octree) deserializeObject(table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
         HashSet<Tuple> tuples = new HashSet<>();
         Hashtable<Object,String> res=new Hashtable<>();
         tree.select(arrSQLTerms,arr,res);
-        System.out.println(res.toString());
+
         for(Object primaryKey:res.keySet()){
             Page page = (Page) deserializeObject(res.get(primaryKey));
             for(Tuple tuple:page.getTuplesInPage()){
@@ -965,73 +961,116 @@ public class DBApp {
             }
             serializeObject(page,res.get(primaryKey));
         }
-        System.out.println(tuples.size());
         serializeObject(tree,table.getOctreePaths().get(arrSQLTerms[arr[1]]._strColumnName));
-        serializeObject(table, "src/Resources/" +arrSQLTerms[0]._strTableName  + ".ser");
-         return tuples;
+        return tuples;
     }
 
     public Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strarrOperators)
             throws DBAppException{
         validTerms(arrSQLTerms,strarrOperators);
+        Table table = (Table) deserializeObject("src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
         ArrayList<HashSet<Tuple>> arrOfArr = new ArrayList<>();
         int i=0;
         for( i=0;i<arrSQLTerms.length;i++){
-           int[] arr=shouldUseIndex(arrSQLTerms,i,strarrOperators);
-           if(arr[0]==-1){
-               System.out.println(i+" "+arr[0]);
-               break;
-           }
-           for(int j=i;j<arr[0];j++){
-               System.out.println("elmafrod mated5olsh");
-               arrOfArr.add(getSelectedTuples(arrSQLTerms[j]));
-           }
-            arrOfArr.add(selectUsingIndex(arrSQLTerms,arr));
+            int[] arr=shouldUseIndex(arrSQLTerms,i,strarrOperators);
+            if(arr[0]==-1){
+
+                break;
+            }
+            for(int j=i;j<arr[0];j++){
+
+                arrOfArr.add(getSelectedTuples(arrSQLTerms[j], table));
+            }
+            arrOfArr.add(selectUsingIndex(arrSQLTerms,arr,table));
             strarrOperators[arr[0]]="null";
             strarrOperators[arr[0]+1]="null";
             i=arr[0]+2;//to get the next unindexed sqlterms
         }
         while(i<arrSQLTerms.length){
-            arrOfArr.add(getSelectedTuples(arrSQLTerms[i]));
+            arrOfArr.add(getSelectedTuples(arrSQLTerms[i],table));
             i++;
         }
+
+
         HashSet<Tuple> filtered = arrOfArr.get(0);
+        int k=1;
         for(int j=0; j<strarrOperators.length; j++){
             if(strarrOperators[j].equals("null")){
                 continue;
             }
             String operator = strarrOperators[j];
             switch(operator.toLowerCase()){
+
                 case "or":
-                    filtered.addAll(arrOfArr.get(j+1));
+                    ArrayList<Tuple> add1=new ArrayList<>();
+                    for(Tuple tuple1:arrOfArr.get(k)){
+                        boolean flag=false;
+                        for(Tuple tuple2:filtered){
+                            if(((Comparable)tuple1.getPrimaryKey()).compareTo(tuple2.getPrimaryKey())==0){
+                                flag=true;
+                                break;
+                            }
+                        }
+                        if(!flag){
+                            add1.add(tuple1);
+                        }
+                    }
+                    for(Tuple t:add1){
+                        filtered.add(t);
+                    }
+                    k++;
                     break;
                 case "and":
-                    ArrayList<Tuple> remove=new ArrayList<>();
+                    ArrayList<Tuple> remove1=new ArrayList<>();
+
                     for(Tuple t : filtered){
-                        if(!arrOfArr.get(j+1).contains(t)){
-                            remove.add(t);
+                        boolean flag=false;
+                        for(Tuple t1:arrOfArr.get(k)){
+                            if(((Comparable)t.getPrimaryKey()).compareTo(t1.getPrimaryKey())==0){
+                                flag=true;
+                                break;
+                            }
+                        }
+                        if(!flag){
+                            remove1.add(t);
                         }
                     }
-                    for(Tuple t:remove){
+                    for(Tuple t:remove1){
                         filtered.remove(t);
                     }
+
+                    k++;
                     break;
                 default:
-                    for(Tuple t : arrOfArr.get(j+1)){
-                        if(filtered.contains(t)) {
-                            filtered.remove(t);
-                        }else{
-                            filtered.add(t);
+                    ArrayList<Tuple> remove2=new ArrayList<>();
+                    ArrayList<Tuple> remove3=new ArrayList<>();
+                    for(Tuple t : arrOfArr.get(k)){
+                        for(Tuple t1:filtered){
+                            if(((Comparable)t.getPrimaryKey()).compareTo(t1.getPrimaryKey())==0) {
+                                remove3.add(t1);
+                                remove2.add(t);
+                                break;
+                            }
                         }
                     }
+                    for(Tuple t:remove3){
+                        filtered.remove(t);
+                    }
+                    for(Tuple t:remove2){
+                        arrOfArr.get(k).remove(t);
+                    }
+                    for(Tuple t:arrOfArr.get(k)){
+                        filtered.add(t);
+                    }
+                    k++;
             }
         }
+        serializeObject(table , "src/resources/" + arrSQLTerms[0]._strTableName + ".ser");
         return filtered.iterator();
     }
-    
-    public HashSet<Tuple> getSelectedTuples(SQLTerm sqlTerm) throws DBAppException {
+
+    public HashSet<Tuple> getSelectedTuples(SQLTerm sqlTerm, Table table) throws DBAppException {
         HashSet<Tuple> tuples = new HashSet<>();
-        Table table = (Table) deserializeObject("src/resources/" + sqlTerm._strTableName + ".ser");
         for(String path : table.getPaths()){
             Page page = (Page) deserializeObject(path);
             for(Tuple tuple : page.getTuplesInPage()){
