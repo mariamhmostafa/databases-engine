@@ -79,7 +79,7 @@ public class Octree implements Serializable {
             isLeaf = false;
             for (int i = 0; i < bbs.length; i++) {
                 octreeCount++;
-                bbsPaths[i] = "bbsPath"+octreeCount;
+                bbsPaths[i] = "src/Resources/" + "bbsPaths"+ octreeCount+ ".ser";
                 Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
                 bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5], this.getColumns()[0], this.getColumns()[1], this.getColumns()[2]);
             }

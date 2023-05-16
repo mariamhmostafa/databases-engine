@@ -70,46 +70,52 @@ public class DBApp {
         
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
+        
+        Hashtable<String,Object> htblDelete = new Hashtable<>();
+        htblDelete.put("name", "sarah");
+        htblDelete.put("gpa",2.6);
+        dbApp.deleteFromTable(strTableName,htblDelete);
+        
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
         printOctree(octree);
-        SQLTerm[] arrSQLTerms;
-        arrSQLTerms = new SQLTerm[3];
-        arrSQLTerms[0] = new SQLTerm();
-        arrSQLTerms[1] = new SQLTerm();
-        arrSQLTerms[2] = new SQLTerm();
-        String[]strarrOperators = new String[2];
-        arrSQLTerms[0]._strTableName = "Student";
-        arrSQLTerms[0]._strColumnName= "name";
-        arrSQLTerms[0]._strOperator = ">=";
-        arrSQLTerms[0]._objValue = "frfr";
+//        SQLTerm[] arrSQLTerms;
+//        arrSQLTerms = new SQLTerm[3];
+//        arrSQLTerms[0] = new SQLTerm();
+//        arrSQLTerms[1] = new SQLTerm();
+//        arrSQLTerms[2] = new SQLTerm();
+//        String[]strarrOperators = new String[2];
+//        arrSQLTerms[0]._strTableName = "Student";
+//        arrSQLTerms[0]._strColumnName= "name";
+//        arrSQLTerms[0]._strOperator = ">=";
+//        arrSQLTerms[0]._objValue = "frfr";
+////
+//        arrSQLTerms[1]._strTableName = "Student";
+//        arrSQLTerms[1]._strColumnName= "gpa";
+//        arrSQLTerms[1]._strOperator = "=";
+//        arrSQLTerms[1]._objValue = new Double( 2.6 );
 //
-        arrSQLTerms[1]._strTableName = "Student";
-        arrSQLTerms[1]._strColumnName= "gpa";
-        arrSQLTerms[1]._strOperator = "=";
-        arrSQLTerms[1]._objValue = new Double( 2.6 );
-
-        strarrOperators[0] = "and";
-
-        arrSQLTerms[2]._strTableName = "Student";
-        arrSQLTerms[2]._strColumnName= "id";
-        arrSQLTerms[2]._strOperator = ">";
-        arrSQLTerms[2]._objValue = new Integer( 16 );
-        strarrOperators[1] = "and";
+//        strarrOperators[0] = "and";
 //
-        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+//        arrSQLTerms[2]._strTableName = "Student";
+//        arrSQLTerms[2]._strColumnName= "id";
+//        arrSQLTerms[2]._strOperator = ">";
+//        arrSQLTerms[2]._objValue = new Integer( 16 );
+//        strarrOperators[1] = "and";
+////
+//        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
         
 //        Hashtable<String,Object> toUpdate = new Hashtable<>();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
     
-        while(resultSet.hasNext()) {
-            Tuple t = (Tuple) resultSet.next();
-            System.out.println();
-            for (String key : t.getValues().keySet()) {
-                System.out.println(key + " value: " + t.getValues().get(key).toString());
-            }
-        }
+//        while(resultSet.hasNext()) {
+//            Tuple t = (Tuple) resultSet.next();
+//            System.out.println();
+//            for (String key : t.getValues().keySet()) {
+//                System.out.println(key + " value: " + t.getValues().get(key).toString());
+//            }
+//        }
         
     }
 
@@ -558,8 +564,8 @@ public class DBApp {
             throw new DBAppException("Tuple Not found");
     }
     
-    public ArrayList<Tuple> deleteUsingIndex(String strTableName, Hashtable<String,Object> htblColNameValue) throws DBAppException {
-        Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
+    public ArrayList<Tuple> deleteUsingIndex(Table table, Hashtable<String,Object> htblColNameValue) throws DBAppException {
+        //Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
         //Vector<Octree> mayDelete = findUsingIndex(table, htblColNameValue);
         Hashtable<Object,String> mayDelete = findUsingIndex(table,htblColNameValue);
         ArrayList<Tuple> oldValues = new ArrayList<>();
@@ -603,8 +609,7 @@ public class DBApp {
             }
             serializeObject(octree, path);
         }
-        
-        serializeObject(table, "src/Resources/" + strTableName + ".ser");
+        //serializeObject(table, "src/Resources/" + strTableName + ".ser");
         return oldValues;
     }
     
