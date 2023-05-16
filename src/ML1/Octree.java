@@ -11,12 +11,10 @@ public class Octree implements Serializable {
     private String[]columns=new String[3];
     private static Hashtable<String,Integer> htblColumns= new Hashtable<String,Integer>();
     private Octree[] bbs = new Octree[8];
-    private String[] bbsPaths = new String[8];
     private Vector<Point> points = new Vector<>();
     private Point topLeftFront;
     private Point bottomRightBack;
     private static int maxEntries = Integer.parseInt(getVal("MaximumEntriesinOctreeNode"));
-    private static int octreeCount =0;
 
     private boolean isLeaf = true;
 
@@ -78,8 +76,6 @@ public class Octree implements Serializable {
         if (isLeaf){
             isLeaf = false;
             for (int i = 0; i < bbs.length; i++) {
-                octreeCount++;
-                bbsPaths[i] = "src/Resources/" + "bbsPaths"+ octreeCount+ ".ser";
                 Comparable[] newBounds = getNewBounds(midx, midy, midz, i);
                 bbs[i] = new Octree(newBounds[0], newBounds[1], newBounds[2], newBounds[3], newBounds[4], newBounds[5], this.getColumns()[0], this.getColumns()[1], this.getColumns()[2]);
             }
@@ -91,9 +87,6 @@ public class Octree implements Serializable {
             }
         }
         bbs[pos].insert(x, y, z, path, clustringkey);
-        for(int i=0; i<bbs.length;i++){
-            serializeObject(bbs[i], bbsPaths[i]);
-        }
     }
 
     public Comparable[] getNewBounds(Comparable midx, Comparable midy, Comparable midz, int pos) {
@@ -696,34 +689,6 @@ public class Octree implements Serializable {
         return htblColumns;
     }
     
-    public String[] getBbsPaths() {
-        return bbsPaths;
-    }
-    
-    protected Object deserializeObject(String path) throws DBAppException {
-        try {
-            FileInputStream fileIn = new FileInputStream(path);
-            ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-            Object o = objectIn.readObject();
-            objectIn.close();
-            fileIn.close();
-            return o;
-        }catch(IOException | ClassNotFoundException e){
-            throw new DBAppException(e);
-        }
-    }
-    
-    protected void serializeObject(Object o, String path) throws DBAppException{
-        try {
-            FileOutputStream fileOut = new FileOutputStream(path);
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-            objectOut.writeObject(o);
-            objectOut.close();
-            fileOut.close();
-        }catch(IOException e){
-            throw new DBAppException(e);
-        }
-    }
 
 }
 
