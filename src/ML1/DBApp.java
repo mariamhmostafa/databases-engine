@@ -19,16 +19,19 @@ public class DBApp {
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
         htblColNameType.put("gpa", "java.lang.Double");
-        
+        htblColNameType.put("birth date", "java.lang.Date");
+
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "a");
         colMin.put("gpa", "0.0");
-        
+        colMin.put("birth date", "2002-03-06");
+
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "zzzzzzzzzzz");
         colMax.put("gpa","5.0");
+        colMax.put("birth date","2005-03-06");
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
         
         //////inserting into table:
@@ -36,86 +39,99 @@ public class DBApp {
         htblColNameValue1.put("id", 19);
         htblColNameValue1.put("name", "mariam");
         htblColNameValue1.put("gpa", 0.87);
+        htblColNameValue1.put("birth date", "2002-05-08");
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
         
         Hashtable<String,Object> htblColNameValue2 = new Hashtable<>();
         htblColNameValue2.put("id", 20);
         htblColNameValue2.put("name", "nairuzy");
         htblColNameValue2.put("gpa", 4.0);
+        htblColNameValue2.put("birth date", "2002-06-09");
         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
         
         Hashtable<String,Object> htblColNameValue4 = new Hashtable<>();
         htblColNameValue4.put("id", 18);
         htblColNameValue4.put("name", "marwa");
         htblColNameValue4.put("gpa", 3.0);
+        htblColNameValue4.put("birth date", "2002-09-13");
         dbApp.insertIntoTable( strTableName , htblColNameValue4 );
         
         Hashtable<String,Object> htblColNameValue5 = new Hashtable<>( );
         htblColNameValue5.put("id", 17);
         htblColNameValue5.put("name", "sarah");
         htblColNameValue5.put("gpa", 3.0);
+        htblColNameValue5.put("birth date", "2003-12-20");
         dbApp.insertIntoTable( strTableName , htblColNameValue5 );
         
         Hashtable<String,Object> htblColNameValue6 = new Hashtable<>( );
         htblColNameValue6.put("id", 16);
         htblColNameValue6.put("name", "sarah");
         htblColNameValue6.put("gpa", 2.6);
+        htblColNameValue6.put("birth date", "2004-07-25");
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
         
         Hashtable<String,Object> htblColNameValue3 = new Hashtable<>( );
         htblColNameValue3.put("id", 26);
         htblColNameValue3.put("name", "frfr");
         htblColNameValue3.put("gpa", 2.6);
+        htblColNameValue3.put("birth date", "2002-05-08");
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
         
         String[] strarrColName = {"gpa", "name", "id"};
         dbApp.createIndex("student", strarrColName);
         
-        Hashtable<String,Object> htblDelete = new Hashtable<>();
-        htblDelete.put("name", "sarah");
-        htblDelete.put("gpa",2.6);
-        dbApp.deleteFromTable(strTableName,htblDelete);
+//        Hashtable<String,Object> htblDelete = new Hashtable<>();
+//        htblDelete.put("name", "sarah");
+//        htblDelete.put("gpa",2.6);
+//        dbApp.deleteFromTable(strTableName,htblDelete);
         
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
         printOctree(octree);
-//        SQLTerm[] arrSQLTerms;
-//        arrSQLTerms = new SQLTerm[3];
-//        arrSQLTerms[0] = new SQLTerm();
-//        arrSQLTerms[1] = new SQLTerm();
-//        arrSQLTerms[2] = new SQLTerm();
-//        String[]strarrOperators = new String[2];
-//        arrSQLTerms[0]._strTableName = "Student";
-//        arrSQLTerms[0]._strColumnName= "name";
-//        arrSQLTerms[0]._strOperator = ">=";
-//        arrSQLTerms[0]._objValue = "frfr";
-////
-//        arrSQLTerms[1]._strTableName = "Student";
-//        arrSQLTerms[1]._strColumnName= "gpa";
-//        arrSQLTerms[1]._strOperator = "=";
-//        arrSQLTerms[1]._objValue = new Double( 2.6 );
+        SQLTerm[] arrSQLTerms;
+        arrSQLTerms = new SQLTerm[4];
+        arrSQLTerms[0] = new SQLTerm();
+        arrSQLTerms[1] = new SQLTerm();
+        arrSQLTerms[2] = new SQLTerm();
+        arrSQLTerms[3] = new SQLTerm();
+        String[]strarrOperators = new String[3];
+        arrSQLTerms[0]._strTableName = "Student";
+        arrSQLTerms[0]._strColumnName= "birth date";
+        arrSQLTerms[0]._strOperator = ">";
+        arrSQLTerms[0]._objValue = "2002-06-09";
+
+        arrSQLTerms[1]._strTableName = "Student";
+        arrSQLTerms[1]._strColumnName= "name";
+        arrSQLTerms[1]._strOperator = ">=";
+        arrSQLTerms[1]._objValue = "frfr";
 //
-//        strarrOperators[0] = "and";
+        arrSQLTerms[2]._strTableName = "Student";
+        arrSQLTerms[2]._strColumnName= "gpa";
+        arrSQLTerms[2]._strOperator = "=";
+        arrSQLTerms[2]._objValue = new Double( 2.6 );
+
+        strarrOperators[0] = "or";
+
+        arrSQLTerms[3]._strTableName = "Student";
+        arrSQLTerms[3]._strColumnName= "id";
+        arrSQLTerms[3]._strOperator = ">";
+        arrSQLTerms[3]._objValue = new Integer( 16 );
+        strarrOperators[1] = "and";
+        strarrOperators[2] = "and";
 //
-//        arrSQLTerms[2]._strTableName = "Student";
-//        arrSQLTerms[2]._strColumnName= "id";
-//        arrSQLTerms[2]._strOperator = ">";
-//        arrSQLTerms[2]._objValue = new Integer( 16 );
-//        strarrOperators[1] = "and";
-////
-//        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+        Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
         
 //        Hashtable<String,Object> toUpdate = new Hashtable<>();
 //        toUpdate.put("name", "mariam" );
 //        toUpdate.put("gpa", 0.7);
 //        dbApp.updateTable(strTableName,"19" ,toUpdate);
     
-//        while(resultSet.hasNext()) {
-//            Tuple t = (Tuple) resultSet.next();
-//            System.out.println();
-//            for (String key : t.getValues().keySet()) {
-//                System.out.println(key + " value: " + t.getValues().get(key).toString());
-//            }
-//        }
+        while(resultSet.hasNext()) {
+            Tuple t = (Tuple) resultSet.next();
+            System.out.println();
+            for (String key : t.getValues().keySet()) {
+                System.out.println(key + " value: " + t.getValues().get(key).toString());
+            }
+        }
         
     }
 
