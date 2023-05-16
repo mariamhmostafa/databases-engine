@@ -1,7 +1,5 @@
 package ML1;
 
-import java.io.IOException;
-
 public class DBAppException extends Exception {
     public DBAppException(){
         super();
@@ -9,7 +7,6 @@ public class DBAppException extends Exception {
     public DBAppException(String s){
         super(s);
     }
-
     public DBAppException(Exception e) {
         super(e);
     }

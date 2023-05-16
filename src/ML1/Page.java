@@ -1,7 +1,6 @@
 package ML1;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.util.*;
 public class Page implements Serializable {
 
@@ -44,6 +43,7 @@ public class Page implements Serializable {
         }catch(Exception e){System.out.println(e.getMessage());}
         return keyval;
     }
+    
     public Object getMinValInPage() {
         return minValInPage;
     }
@@ -67,12 +67,8 @@ public class Page implements Serializable {
     public void setMaxValInPage(Object maxValInPage) {
         this.maxValInPage = maxValInPage;
     }
+    
     public boolean isFull(){
         return pageRows == maxRows;
-        //if( DBApp.MaximumRowsCountinTablePage)
-    }
-
-    public void createFile(){
-
     }
 }

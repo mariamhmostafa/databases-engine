@@ -1,6 +1,5 @@
 package ML1;
 
-import java.beans.Transient;
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,7 +11,6 @@ public class Table implements Serializable {
     Hashtable<String,String> htblColNameMax;
     Vector<String> paths =new Vector<>();
     private int pageCounter=0;
-
     private Hashtable<String, String> octrees = new Hashtable<>();
 
     public Table(String strTableName,String strClusteringKeyColumn, Hashtable<String,String> htblColNameType, Hashtable<String,String>htblColNameMin,Hashtable<String,String> htblColNameMax){
@@ -59,5 +57,3 @@ public class Table implements Serializable {
         this.pageCounter = pageCounter;
     }
 }
-//if within max and min: deserialize then binary search and then insert
-//class properties
