@@ -40,6 +40,9 @@ public class Point implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return (this.x).equals(((Point)obj).x)&&(this.y).equals(((Point)obj).y) &&(this.z).equals(((Point)obj).z);
+    }
 
+    public String toString(){
+        return "x: "+ x + " y: "+ y + " z: "+ z + " has " + reference.size() + " references";
     }
 }

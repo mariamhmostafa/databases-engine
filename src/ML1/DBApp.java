@@ -74,9 +74,17 @@ public class DBApp {
         Hashtable<String,Object> htblDelete = new Hashtable<>();
         htblDelete.put("name", "sarah");
         htblDelete.put("gpa",2.6);
-        dbApp.deleteFromTable(strTableName,htblDelete);
-        
+       // dbApp.deleteFromTable(strTableName,htblDelete);
+        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
+        Hashtable<Object, String> find = dbApp.findUsingIndex(table, htblDelete);
+        for(Object key : find.keySet()){
+            for(Point p: (Vector<Point>) key){
+                System.out.println(p);
+            }
+            System.out.println("with path: " + find.get(key));
+        }
+
         printOctree(octree);
 //        SQLTerm[] arrSQLTerms;
 //        arrSQLTerms = new SQLTerm[3];
@@ -565,8 +573,6 @@ public class DBApp {
     }
     
     public ArrayList<Tuple> deleteUsingIndex(Table table, Hashtable<String,Object> htblColNameValue) throws DBAppException {
-        //Table table = (Table) deserializeObject("src/Resources/" + strTableName + ".ser");
-        //Vector<Octree> mayDelete = findUsingIndex(table, htblColNameValue);
         Hashtable<Object,String> mayDelete = findUsingIndex(table,htblColNameValue);
         ArrayList<Tuple> oldValues = new ArrayList<>();
         //object is vector of points
