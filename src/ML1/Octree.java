@@ -309,7 +309,7 @@ public class Octree implements Serializable {
     }
 
     public void select(SQLTerm[] sqlTerm,int[] arr,Hashtable<Object,String>res) {//we should enter the columns in the correct order of the octree columns
-       System.out.println("SELECT INDEX");
+
 
         Object valuex = sqlTerm[arr[1]]._objValue;
         Object valuey= sqlTerm[arr[2]]._objValue;
@@ -324,7 +324,7 @@ public class Octree implements Serializable {
             if(!isLeaf) {
                 switch (sqlTerm[arr[1]]._strOperator) {
                     case ">":
-                        System.out.println("x I entered case >");
+
                         if (compareTo((Comparable) valuex, midx) > 0) {
                             xchildren.add(4);
                             xchildren.add(5);
@@ -343,7 +343,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
-                        System.out.println("x I entered case >=");
+
                         xchildren.add(0);
                         xchildren.add(1);
                         xchildren.add(2);
@@ -354,7 +354,7 @@ public class Octree implements Serializable {
                         xchildren.add(7);
                         break;
                     case "<":
-                        System.out.println("x I entered case <");
+
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -371,7 +371,7 @@ public class Octree implements Serializable {
                             xchildren.add(7);
                         }
                     case "<=":
-                        System.out.println("x I entered case <=");
+
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -389,7 +389,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
-                        System.out.println("x I entered case !=");
+
                         xchildren.add(0);
                         xchildren.add(1);
                         xchildren.add(2);
@@ -400,7 +400,7 @@ public class Octree implements Serializable {
                         xchildren.add(7);
                         break;
                     default:
-                        System.out.println("x I entered case =");
+
                         if (compareTo((Comparable) valuex, midx) <= 0) {
                             xchildren.add(0);
                             xchildren.add(1);
@@ -417,7 +417,7 @@ public class Octree implements Serializable {
                 }
                 switch (sqlTerm[arr[2]]._strOperator) {
                     case ">":
-                        System.out.println("y I entered case >");
+
                         if (compareTo((Comparable) valuey, midy) > 0) {
                             ychildren.add(2);
                             ychildren.add(3);
@@ -436,7 +436,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
-                        System.out.println("y I entered case >=");
+
                        if( compareTo((Comparable) valuey, midy) > 0) {
                            ychildren.add(2);
                            ychildren.add(3);
@@ -455,7 +455,7 @@ public class Octree implements Serializable {
                        }
                         break;
                     case "<":
-                        System.out.println("y I entered case <");
+
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
@@ -472,7 +472,7 @@ public class Octree implements Serializable {
                             ychildren.add(7);
                         }
                     case "<=":
-                        System.out.println("y I entered case <=");
+
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
@@ -490,7 +490,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
-                        System.out.println("y I entered case !=");
+
                         ychildren.add(0);
                         ychildren.add(1);
                         ychildren.add(2);
@@ -501,7 +501,7 @@ public class Octree implements Serializable {
                         ychildren.add(7);
                         break;
                     default:
-                        System.out.println("y I entered case =");
+
                         if (compareTo((Comparable) valuey, midy) <= 0) {
                             ychildren.add(0);
                             ychildren.add(1);
@@ -518,7 +518,7 @@ public class Octree implements Serializable {
                 }
                 switch (sqlTerm[arr[3]]._strOperator) {
                     case ">":
-                        System.out.println("z I entered case >");
+
                         if (compareTo((Comparable) valuez, midz) > 0) {
                             zchildren.add(1);
                             zchildren.add(3);
@@ -537,7 +537,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case ">="://no matter the value compared to mid always have to search in them all
-                        System.out.println("z I entered case >=");
+
                         if (compareTo((Comparable) valuez, midz) > 0) {
                             zchildren.add(1);
                             zchildren.add(3);
@@ -556,7 +556,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "<":
-                        System.out.println("z I entered case <");
+
                         if (compareTo((Comparable) valuez, midz) <= 0) {
                             zchildren.add(0);
                             zchildren.add(2);
@@ -573,7 +573,7 @@ public class Octree implements Serializable {
                             zchildren.add(7);
                         }
                     case "<=":
-                        System.out.println("z I entered case <=");
+
                         if (compareTo((Comparable) valuez, midz) <= 0) {
                             zchildren.add(0);
                             zchildren.add(2);
@@ -591,7 +591,7 @@ public class Octree implements Serializable {
                         }
                         break;
                     case "!=":
-                        System.out.println("z I entered case !=");
+
                         zchildren.add(0);
                         zchildren.add(1);
                         zchildren.add(2);
@@ -602,7 +602,7 @@ public class Octree implements Serializable {
                         zchildren.add(7);
                         break;
                     default:
-                        System.out.println("z I entered case =");
+
                         if (compareTo((Comparable) valuez, midz) <= 0) {
                             zchildren.add(0);
                             zchildren.add(2);
@@ -623,20 +623,20 @@ public class Octree implements Serializable {
                     }
                 }
             }else{
-                System.out.println("I am a leaf");
+
                 for(Point p:points){
                     if(isSelected(p.getX(),sqlTerm[arr[1]]._objValue, sqlTerm[arr[1]]._strOperator)&&
                             isSelected(p.getY(),sqlTerm[arr[2]]._objValue, sqlTerm[arr[2]]._strOperator)&&
                             isSelected(p.getZ(),sqlTerm[arr[3]]._objValue, sqlTerm[arr[3]]._strOperator)){
-                        System.out.println("yes I am a result");
+
                         for(Object ref:p.getReference().keySet()){
                             res.put(ref,p.getReference().get(ref));
-                            System.out.println(res.toString());
+
                         }
                     }
                 }
             }
-        System.out.println(res.toString());
+
 
     }
 

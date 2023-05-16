@@ -1,5 +1,6 @@
 Table Name, Column Name, Column Type, ClusteringKey, IndexName,IndexType, min, max
 student, gpa, java.lang.double, false, null, null, 0.0, 5.0
-student, birth date, java.lang.date, false, null, null, 2002-03-06, 2005-03-06
+student, birth date, java.util.date, false, null, null, 2002-03-06, 2005-03-06
+student, num, java.lang.integer, false, null, null, 0, 50
 student, name, java.lang.string, false, null, null, a, zzzzzzzzzzz
 student, id, java.lang.integer, true, null, null, 0, 100
