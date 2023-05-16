@@ -19,16 +19,19 @@ public class DBApp {
         htblColNameType.put("id", "java.lang.Integer");
         htblColNameType.put("name", "java.lang.String");
         htblColNameType.put("gpa", "java.lang.Double");
+        htblColNameType.put("age", "java.lang.Integer");
 
         Hashtable <String, String> colMin = new Hashtable<>();
         colMin.put("id", "0");
         colMin.put("name", "a");
         colMin.put("gpa", "0.0");
+        colMin.put("age", "15");
 
         Hashtable <String, String> colMax = new Hashtable<>();
         colMax.put("id", "100");
         colMax.put("name", "zzzzzzzzzzz");
         colMax.put("gpa","5.0");
+        colMax.put("age","30");
         dbApp.createTable( strTableName, "id", htblColNameType, colMin, colMax);
 
         //////inserting into table:
@@ -36,52 +39,62 @@ public class DBApp {
         htblColNameValue1.put("id", 19);
         htblColNameValue1.put("name", "mariam");
         htblColNameValue1.put("gpa", 0.87);
+        htblColNameValue1.put("age", 20);
         dbApp.insertIntoTable( strTableName , htblColNameValue1 );
 
         Hashtable<String,Object> htblColNameValue2 = new Hashtable<>();
         htblColNameValue2.put("id", 20);
         htblColNameValue2.put("name", "nairuzy");
         htblColNameValue2.put("gpa", 4.0);
+        htblColNameValue2.put("age", 19);
         dbApp.insertIntoTable( strTableName , htblColNameValue2 );
 
         Hashtable<String,Object> htblColNameValue4 = new Hashtable<>();
         htblColNameValue4.put("id", 18);
         htblColNameValue4.put("name", "marwa");
         htblColNameValue4.put("gpa", 3.0);
+        htblColNameValue4.put("age", 25);
         dbApp.insertIntoTable( strTableName , htblColNameValue4 );
 
         Hashtable<String,Object> htblColNameValue5 = new Hashtable<>( );
         htblColNameValue5.put("id", 17);
         htblColNameValue5.put("name", "sarah");
         htblColNameValue5.put("gpa", 3.0);
+        htblColNameValue5.put("age", 29);
         dbApp.insertIntoTable( strTableName , htblColNameValue5 );
 
         Hashtable<String,Object> htblColNameValue6 = new Hashtable<>( );
         htblColNameValue6.put("id", 16);
         htblColNameValue6.put("name", "sarah");
         htblColNameValue6.put("gpa", 2.6);
+        htblColNameValue6.put("age", 21);
         dbApp.insertIntoTable( strTableName , htblColNameValue6 );
 
         Hashtable<String,Object> htblColNameValue3 = new Hashtable<>( );
         htblColNameValue3.put("id", 26);
         htblColNameValue3.put("name", "frfr");
         htblColNameValue3.put("gpa", 2.6);
+        htblColNameValue3.put("age", 26);
         dbApp.insertIntoTable( strTableName , htblColNameValue3 );
 
-        String[] strarrColName = {"gpa", "name", "id"};
+        String[] strarrColName = {"gpa", "age", "name"};
         dbApp.createIndex("student", strarrColName);
 
-        Hashtable<String,Object> htblDelete = new Hashtable<>();
-        htblDelete.put("name", "sarah");
-        htblDelete.put("gpa",2.6);
-        dbApp.deleteFromTable(strTableName,htblDelete);
-        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
-        for(String p: table.getPaths()){
-            Page page = (Page) dbApp.deserializeObject(p);
-            for(Tuple t: page.getTuplesInPage()){
-                System.out.println(t.getPrimaryKey());
-            }
-        }
+//        Hashtable<String,Object> htblDelete = new Hashtable<>();
+//        htblDelete.put("name", "sarah");
+//        htblDelete.put("gpa",2.6);
+//        dbApp.deleteFromTable(strTableName,htblDelete);
+        
+        Hashtable<String, Object> htblUpdate = new Hashtable<>();
+        htblUpdate.put("age", 16);
+        dbApp.updateTable(strTableName,"19",htblUpdate );
+//        Table table = (Table) dbApp.deserializeObject("src/Resources/" + strTableName + ".ser");
+//        for(String p: table.getPaths()){
+//            Page page = (Page) dbApp.deserializeObject(p);
+//            for(Tuple t: page.getTuplesInPage()){
+//                System.out.println(t.getPrimaryKey());
+//            }
+//        }
         Octree octree = (Octree) dbApp.deserializeObject("src/Resources/"+ strTableName+"0"+"Octree.ser");
 //        Hashtable<Object, String> find = dbApp.findUsingIndex(table, htblDelete);
 //        for(Object key : find.keySet()){
@@ -418,11 +431,13 @@ public class DBApp {
                          } else if (colType.equals("java.lang.double")) {
                              clusteringKeyValue = Double.parseDouble(strClusteringKeyValue);
                          }
-                         if (table.getOctreePaths().get(primaryKeyName)!=null){ //use index
-                             //Octree octree = (Octree) deserializeObject(table.getOctreePaths().get(primaryKeyName));
-                             serializeObject(table,"src/Resources/" + strTableName + ".ser");
-                             updateUsingIndex(clusteringKeyValue,htblColNameValue,table);
-                             return;
+                         for(String col : htblColNameValue.keySet() ){
+                             if (table.getOctreePaths().get(primaryKeyName)!=null || table.getOctreePaths().get(col)!=null){ //use index
+                                 //Octree octree = (Octree) deserializeObject(table.getOctreePaths().get(primaryKeyName));
+                                 serializeObject(table,"src/Resources/" + strTableName + ".ser");
+                                 updateUsingIndex(clusteringKeyValue,htblColNameValue,table);
+                                 return;
+                             }
                          }
                          int indexInPage = -1;
                          for (String pathName : table.getPaths()) {
